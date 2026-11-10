@@ -1,0 +1,18 @@
+# Changelog
+
+## Changes in v0.99.0
+
+- First version:
+  [`annotateIsotopes()`](https://stanstrup.github.io/IonFamilies/reference/annotateIsotopes.md),
+  [`annotateAdducts()`](https://stanstrup.github.io/IonFamilies/reference/annotateAdducts.md),
+  [`adductHints()`](https://stanstrup.github.io/IonFamilies/reference/adductHints.md),
+  [`formatAdducts()`](https://stanstrup.github.io/IonFamilies/reference/formatAdducts.md),
+  [`bestHypotheses()`](https://stanstrup.github.io/IonFamilies/reference/bestHypotheses.md),
+  [`neutralMassVote()`](https://stanstrup.github.io/IonFamilies/reference/neutralMassVote.md),
+  [`impliedMasses()`](https://stanstrup.github.io/IonFamilies/reference/impliedMasses.md),
+  [`isIsotopologue()`](https://stanstrup.github.io/IonFamilies/reference/isIsotopologue.md),
+  [`IsotopologueParam()`](https://stanstrup.github.io/IonFamilies/reference/IsotopologueParam.md),
+  [`AdductVoteParam()`](https://stanstrup.github.io/IonFamilies/reference/AdductVoteParam.md)
+  and the default rules `adductRules` from commonMZ.
+- Ported from the prototype in the “Introduction to Nutritional
+  Metabolomics” course investigation of CAMERA replacements.

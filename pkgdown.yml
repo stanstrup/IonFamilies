@@ -1,0 +1,10 @@
+pandoc: 3.8.3
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  IonFamilies: IonFamilies.html
+  neutral-mass-voting: neutral-mass-voting.html
+last_built: 2026-11-10T20:30Z
+urls:
+  reference: https://stanstrup.github.io/IonFamilies/reference
+  article: https://stanstrup.github.io/IonFamilies/articles
