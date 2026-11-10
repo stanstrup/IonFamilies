@@ -1,6 +1,6 @@
 Package: IonFamilies
 Title: Isotope and Adduct Annotation of LC-MS Feature Groups
-Version: 0.99.0
+Version: 0.99.1
 Authors@R:
     person("Jan", "Stanstrup", email = "stanstrup@gmail.com",
            role = c("aut", "cre"))
