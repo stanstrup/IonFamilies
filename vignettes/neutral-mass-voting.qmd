@@ -1,0 +1,141 @@
+---
+title: "How neutral-mass voting works"
+package: IonFamilies
+date: today
+format:
+  html:
+    toc: true
+    toc-location: left
+    code-fold: false
+    theme: cosmo
+vignette: >
+  %\VignetteIndexEntry{How neutral-mass voting works}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup}
+#| include: false
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+# The example
+
+This vignette walks through the annotation of one feature group step by step,
+using the low-level functions that `annotateAdducts()` is built from. The
+group holds the ions of **2-furoylglycine** (C~7~H~7~NO~4~,
+M = 169.0375 Da), a marker of coffee intake, measured in positive mode in a
+coffee intervention study. All eight features elute within 0.2 s and their
+intensities correlate across the study samples, so `groupFeatures()` put them
+in one group.
+
+```{r data}
+library(IonFamilies)
+
+mz <- c(95.0124, 124.0392, 152.0342, 170.0445, 171.0496, 192.0275,
+        377.0300, 393.0019)
+int <- c(71.6, 81.4, 49.8, 100, 4.33, 11.3, 1.76, 1.82)
+grp <- rep("FG.1", length(mz))
+```
+
+# Step 1: isotopes
+
+Heavy isotopologues are not adducts, so they are found first and left out of
+the voting. `MetaboCoreUtils::isotopologues()` checks that the mass
+difference fits an isotope step *and* that the intensity ratio is plausible
+for a molecule of that mass.
+
+```{r isotopes}
+iso <- annotateIsotopes(mz, IsotopologueParam(), intensity = int,
+                        groups = grp)
+data.frame(mz, int, iso)
+```
+
+m/z 171.050 is the ¹³C isotopologue of m/z 170.045 (4 % of its intensity,
+about what seven carbons give).
+
+# Step 2: implied neutral masses
+
+A rule describes how an ion is formed from `nmol` neutral molecules: its
+charge and the mass that is added or lost (`massdiff`). Inverting it gives the
+neutral mass a feature would have *if* it were that ion:
+
+$$M = \frac{|z| \cdot m/z - \Delta m}{n_{mol}}$$
+
+```{r rules}
+rules <- defaultAdductRules("positive")
+some <- rules[rules$name %in% c("[M+H]+", "[M+Na]+", "[M+H-H2O]+",
+                                "[M+H-HCOOH]+", "[2M+K]+"), ]
+some[, c("name", "nmol", "charge", "massdiff", "quasi", "ips")]
+round(impliedMasses(mz, some), 4)
+```
+
+Read the table column by column. The value 169.037 appears for m/z 170.045
+as `[M+H]+`, for 192.028 as `[M+Na]+`, for 152.034 as `[M+H-H2O]+`, for
+124.039 as `[M+H-HCOOH]+` and for 377.030 as `[2M+K]+`. Five features agree
+on one neutral mass.
+
+# Step 3: voting
+
+`neutralMassVote()` automates that reading for all rules:
+
+1. Every feature is tried as every **quasi-molecular** ion (rules with
+   `quasi == 1`, such as `[M+H]+` and `[M+Na]+`). Each try is an *anchor*
+   and gives a candidate neutral mass.
+2. A candidate becomes a **hypothesis** when at least one *other* feature is
+   explained by some rule as an ion of the same mass (within `ppm` +
+   `mzabs`).
+3. Hypotheses found from different anchors but with the same members are
+   merged.
+4. Hypotheses are **ranked** by the summed rule score (`ips`, higher for
+   common ions) and then by the intensity they explain.
+
+```{r vote}
+keep <- !isIsotopologue(iso)
+votes <- neutralMassVote(mz[keep], int[keep], rules)
+votes$mz <- mz[keep][votes$feature]
+head(votes[, c("hypothesis", "M", "n_ions", "score", "mz", "adduct")], 12)
+```
+
+Hypothesis 1 is furoylglycine with five supporting ions. The later
+hypotheses are coincidences: with `r nrow(rules)` rules, most pairs of m/z
+values can be connected by *some* pair of rules.
+
+# Step 4: keep all hypotheses or only the best?
+
+CAMERA reported, for each feature, only hypotheses that did not conflict with
+better ones. `bestHypotheses()` reproduces that choice:
+
+```{r best}
+hints <- annotateAdducts(mz, AdductVoteParam(), intensity = int,
+                         groups = grp, exclude = !keep)
+best <- bestHypotheses(hints)
+best$mz <- mz[best$feature]
+best[, c("mz", "M", "adduct", "n_ions")]
+```
+
+*IonFamilies* keeps **all** hypotheses by default, ranked per feature. A
+true annotation that ranks second for a feature is then still visible.
+Missing a true relationship costs more than showing an extra suggestion,
+because annotations are hints to be checked. `nBest` limits how many are
+written to text:
+
+```{r format}
+data.frame(mz, iso,
+           best_only = formatAdducts(hints, nBest = 1, nFeatures = length(mz)),
+           top_three = formatAdducts(hints, nBest = 3, nFeatures = length(mz)))
+```
+
+# Why the grouping matters
+
+Because a long rule list connects almost anything, voting is only meaningful
+inside groups of features that are already known to belong together: same
+retention time, correlated intensities across samples, similar peak shapes.
+That evidence comes from `groupFeatures()`. *IonFamilies* adds the chemical
+interpretation on top. Good groups give good hints.
+
+# Session information
+
+```{r session}
+sessionInfo()
+```

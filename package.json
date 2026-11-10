@@ -1,0 +1,21 @@
+{
+  "name": "ionfamilies",
+  "version": "0.99.0",
+  "description": "Isotope and Adduct Annotation of LC-MS Feature Groups",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stanstrup/IonFamilies.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stanstrup/IonFamilies/issues"
+  },
+  "homepage": "https://stanstrup.github.io/IonFamilies",
+  "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/exec": "^7.1.0",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^11.0.1",
+    "semantic-release": "^25.0.1"
+  }
+}

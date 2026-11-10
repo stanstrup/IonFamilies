@@ -1,0 +1,184 @@
+---
+title: "Getting started with IonFamilies"
+package: IonFamilies
+date: today
+format:
+  html:
+    toc: true
+    toc-location: left
+    code-fold: false
+    theme: cosmo
+vignette: >
+  %\VignetteIndexEntry{Getting started with IonFamilies}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup}
+#| include: false
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+# Introduction
+
+One compound in an LC-MS experiment gives many features: its protonated or
+deprotonated molecule, other adducts such as `[M+Na]+`, in-source fragments
+such as `[M+H-H2O]+`, and the isotopes of all of these. Together they form
+the compound's *ion family*. Recognising ion families reduces redundancy and
+helps to work out the neutral mass of unknown compounds.
+
+`groupFeatures()` from the *MsFeatures* and *xcms* packages groups features
+that probably come from the same compound (similar retention time, correlated
+abundances across samples, similar peak shapes). It deliberately stops there.
+*IonFamilies* takes the groups and annotates, within each group,
+
+1. **isotope patterns**, with `MetaboCoreUtils::isotopologues()`, which checks
+   mass differences and intensity ratios, and
+2. **adducts and fragments**, by neutral-mass voting with a rule list: a
+   neutral mass is suggested when two or more features of a group can be
+   explained as different ions of it.
+
+All supported neutral-mass hypotheses are kept and ranked. The annotations
+are meant as **hints** for what to check, so the default rule list is long
+and recall is preferred over precision. Results are written to the
+`featureDefinitions()` of the `XcmsExperiment` in the format CAMERA used
+(`pcgroup`, `isotopes`, `adduct`), so existing downstream code keeps working.
+The vignette *How neutral-mass voting works* explains the method step by
+step.
+
+## Related packages
+
+* *CAMERA* does grouping, isotope and adduct annotation, but works on the
+  legacy `xcmsSet` class. *IonFamilies* re-implements its neutral-mass voting
+  for `groupFeatures()` groups and keeps all hypotheses, ranked, instead of
+  one per feature.
+* *InterpretMSSpectrum* (`findMAIN()`) ranks main-adduct hypotheses for a
+  single spectrum. *RAMClustR* uses it after its own clustering.
+* *cliqueMS* annotates one sample at a time with its own grouping.
+* *MetaboAnnotation* matches features against compound databases. It
+  complements the database-free annotation here.
+
+# Installation
+
+```{r install}
+#| eval: false
+if (!requireNamespace("remotes", quietly = TRUE))
+    install.packages("remotes")
+remotes::install_github("stanstrup/IonFamilies")
+```
+
+# Grouping features
+
+We use the small example data set that comes with *xcms*: an
+`XcmsExperiment` with peak detection, alignment and correspondence already
+done. First the features are grouped by retention time, then the groups are
+split by the correlation of the features' abundances across samples.
+
+```{r load}
+#| message: false
+library(xcms)
+library(MsFeatures)
+library(IonFamilies)
+
+x <- loadXcmsData("xmse")
+x <- groupFeatures(x, SimilarRtimeParam(diffRt = 10))
+x <- groupFeatures(x, AbundanceSimilarityParam(threshold = 0.7,
+                                               transform = log2))
+table(lengths(split(featureGroups(x), featureGroups(x))))
+```
+
+With raw data available, `EicSimilarityParam()` would add a third step that
+compares peak shapes.
+
+# Isotopes
+
+`annotateIsotopes()` searches isotope patterns within each group. The
+representative intensity of a feature is its median over the samples given by
+`subset` (all samples by default).
+
+```{r isotopes}
+x <- annotateIsotopes(x, IsotopologueParam(ppm = 10, tolerance = 0.005))
+fd <- featureDefinitions(x)
+head(fd[fd$isotopes != "", c("mzmed", "rtmed", "feature_group", "isotopes")])
+```
+
+`isIsotopologue()` identifies the heavy isotopologues, for example to remove
+them before statistics:
+
+```{r is-isotopologue}
+table(isIsotopologue(fd$isotopes))
+```
+
+# Adducts and fragments
+
+`annotateAdducts()` uses the rules in `defaultAdductRules()`, which come from
+the *commonMZ* package and are expanded to one to four molecules per ion.
+
+```{r rules}
+rules <- defaultAdductRules("positive")
+nrow(rules)
+head(rules)
+```
+
+`nBest` sets how many hypotheses per feature are written to the `adduct`
+column. All of them are stored in any case.
+
+```{r adducts}
+x <- annotateAdducts(x, AdductVoteParam(polarity = "positive", nBest = 2))
+fd <- featureDefinitions(x)
+head(fd[fd$adduct != "", c("mzmed", "pcgroup", "isotopes", "adduct")])
+```
+
+The full table of hypotheses, one row per hypothesis and feature, is
+returned by `adductHints()`. `rank` is the rank of the hypothesis for that
+feature and `n_ions` the number of features that support the neutral mass.
+
+```{r hints}
+hints <- adductHints(x)
+head(hints)
+```
+
+The text column can be rewritten with another `nBest` without recomputing:
+
+```{r format}
+x <- formatAdducts(x, nBest = 1)
+head(featureDefinitions(x)$adduct[featureDefinitions(x)$adduct != ""])
+```
+
+`bestHypotheses()` reduces the hints to at most one neutral mass per feature,
+as CAMERA's final result did:
+
+```{r best}
+head(bestHypotheses(hints))
+```
+
+The parameters used are stored in the object:
+
+```{r params}
+S4Vectors::metadata(x)$IonFamilies
+```
+
+# Working with plain vectors
+
+All functions also work without *xcms*. Here are the ions of 2-furoylglycine
+(M = 169.0375), a marker of coffee intake, from one feature group:
+
+```{r vectors}
+mz <- c(95.0124, 124.0392, 152.0342, 170.0445, 171.0496, 192.0275,
+        377.0300, 393.0019)
+int <- c(71.6, 81.4, 49.8, 100, 4.33, 11.3, 1.76, 1.82)
+grp <- rep("FG.1", length(mz))
+
+iso <- annotateIsotopes(mz, IsotopologueParam(), intensity = int,
+                        groups = grp)
+hints <- annotateAdducts(mz, AdductVoteParam(), intensity = int,
+                         groups = grp, exclude = isIsotopologue(iso))
+data.frame(mz, isotopes = iso,
+           adduct = formatAdducts(hints, nBest = 2, nFeatures = length(mz)))
+```
+
+# Session information
+
+```{r session}
+sessionInfo()
+```

@@ -1,0 +1,23 @@
+# R session files
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+# Package build artifacts
+inst/doc
+*.tar.gz
+IonFamilies.Rcheck/
+IonFamilies.BiocCheck/
+# Documentation (built by GitHub Actions)
+docs/
+# Vignettes
+vignettes/*_files/
+vignettes/*.html
+vignettes/.quarto/
+# Node.js (for semantic-release)
+node_modules/
+package-lock.json
+# Claude Code
+.claude/
+# R plots and temporary files
+Rplots.pdf

@@ -1,0 +1,65 @@
+url: https://stanstrup.github.io/IonFamilies
+template:
+  bootstrap: 5
+  bootswatch: flatly
+
+navbar:
+  structure:
+    left:  [home, reference, articles, news]
+    right: [github]
+  components:
+    home:
+      icon: fas fa-home fa-lg
+      aria-label: Home
+      href: index.html
+    reference:
+      text: Reference
+      href: reference/index.html
+    articles:
+      text: Vignettes
+      menu:
+      - text: "Getting started"
+        href: articles/IonFamilies.html
+      - text: "How neutral-mass voting works"
+        href: articles/neutral-mass-voting.html
+    news:
+      text: Changelog
+      href: news/index.html
+    github:
+      icon: fab fa-github fa-lg
+      aria-label: GitHub repository
+      href: https://github.com/stanstrup/IonFamilies
+
+news:
+  cran_dates: false
+
+reference:
+  - title: Annotating an XcmsExperiment or plain vectors
+    desc: >
+      Isotope and adduct annotation within feature groups, and access to the
+      stored results.
+    contents:
+      - annotateIsotopes
+      - annotateAdducts
+      - adductHints
+      - formatAdducts
+      - bestHypotheses
+      - isIsotopologue
+  - title: Parameters
+    contents:
+      - IsotopologueParam
+      - AdductVoteParam
+  - title: Rules
+    contents:
+      - defaultAdductRules
+      - adductRules
+  - title: Low-level functions
+    desc: >
+      The building blocks of the adduct annotation, exported for teaching and
+      testing.
+    contents:
+      - impliedMasses
+      - neutralMassVote
+  - title: Package
+    contents:
+      - IonFamilies-package

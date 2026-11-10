@@ -1,0 +1,51 @@
+Package: IonFamilies
+Title: Isotope and Adduct Annotation of LC-MS Feature Groups
+Version: 0.99.0
+Authors@R:
+    person("Jan", "Stanstrup", email = "stanstrup@gmail.com",
+           role = c("aut", "cre"))
+Description: Annotates the ion family of a compound, i.e. its isotopes,
+    adducts and in-source fragments, within groups of LC-MS features such as
+    those defined by `groupFeatures()` from the 'MsFeatures' and 'xcms'
+    packages. Isotope patterns are detected with
+    `MetaboCoreUtils::isotopologues()`. Adducts and fragments are found by
+    neutral-mass voting with a rule list: every supported neutral-mass
+    hypothesis is kept and ranked, so that annotations can be used as
+    hints. Results are stored in the `featureDefinitions()` of an
+    `XcmsExperiment` in a CAMERA-compatible format.
+License: Artistic-2.0
+Encoding: UTF-8
+Depends:
+    R (>= 4.6.0)
+Imports:
+    methods,
+    stats,
+    utils,
+    MetaboCoreUtils,
+    MsFeatures,
+    S4Vectors,
+    xcms (>= 4.0.0)
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    quarto,
+    faahKO
+VignetteBuilder: quarto
+SystemRequirements: quarto
+biocViews: MassSpectrometry, Metabolomics, Annotation, Software
+URL: https://stanstrup.github.io/IonFamilies, https://github.com/stanstrup/IonFamilies
+BugReports: https://github.com/stanstrup/IonFamilies/issues
+Roxygen: list(markdown = TRUE)
+Config/testthat/edition: 3
+Collate:
+    'AllClasses.R'
+    'AllGenerics.R'
+    'IonFamilies-package.R'
+    'data.R'
+    'isotopes.R'
+    'adducts.R'
+    'format.R'
+    'methods-numeric.R'
+    'methods-XcmsExperiment.R'
+    'methods-show.R'
+Config/roxygen2/version: 8.1.1
