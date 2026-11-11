@@ -111,7 +111,7 @@ fd %>%
 them before statistics:
 
 ```{r is-isotopologue}
-table(isIsotopologue(fd$isotopes))
+count(fd, heavy_isotopologue = isIsotopologue(isotopes))
 ```
 
 # Adducts and fragments

@@ -30,7 +30,9 @@ intensities correlate across the study samples, so `groupFeatures()` put them
 in one group.
 
 ```{r data}
+#| message: false
 library(IonFamilies)
+library(dplyr)
 
 mz <- c(95.0124, 124.0392, 152.0342, 170.0445, 171.0496, 192.0275,
         377.0300, 393.0019)
@@ -64,9 +66,11 @@ $$M = \frac{|z| \cdot m/z - \Delta m}{n_{mol}}$$
 
 ```{r rules}
 rules <- defaultAdductRules("positive")
-some <- rules[rules$name %in% c("[M+H]+", "[M+Na]+", "[M+H-H2O]+",
-                                "[M+H-HCOOH]+", "[2M+K]+"), ]
-some[, c("name", "nmol", "charge", "massdiff", "quasi", "ips")]
+some <- rules %>%
+    filter(name %in% c("[M+H]+", "[M+Na]+", "[M+H-H2O]+", "[M+H-HCOOH]+",
+                       "[2M+K]+"))
+some %>%
+    select(name, nmol, charge, massdiff, quasi, ips)
 round(impliedMasses(mz, some), 4)
 ```
 
@@ -93,8 +97,10 @@ on one neutral mass.
 ```{r vote}
 keep <- !isIsotopologue(iso)
 votes <- neutralMassVote(mz[keep], int[keep], rules)
-votes$mz <- mz[keep][votes$feature]
-head(votes[, c("hypothesis", "M", "n_ions", "score", "mz", "adduct")], 12)
+votes %>%
+    mutate(mz = mz[keep][feature]) %>%
+    select(hypothesis, M, n_ions, score, mz, adduct) %>%
+    head(12)
 ```
 
 Hypothesis 1 is furoylglycine with five supporting ions. The later
@@ -109,9 +115,9 @@ better ones. `bestHypotheses()` reproduces that choice:
 ```{r best}
 hints <- annotateAdducts(mz, AdductVoteParam(), intensity = int,
                          groups = grp, exclude = !keep)
-best <- bestHypotheses(hints)
-best$mz <- mz[best$feature]
-best[, c("mz", "M", "adduct", "n_ions")]
+bestHypotheses(hints) %>%
+    mutate(mz = mz[feature]) %>%
+    select(mz, M, adduct, n_ions)
 ```
 
 *IonFamilies* keeps **all** hypotheses by default, ranked per feature. A
