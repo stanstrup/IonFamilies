@@ -140,10 +140,10 @@
 <p><code><a href="../reference/isIsotopologue.html">isIsotopologue()</a></code> identifies the heavy isotopologues, for example to remove them before statistics:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="../reference/isIsotopologue.html">isIsotopologue</a></span><span class="op">(</span><span class="va">fd</span><span class="op">$</span><span class="va">isotopes</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; FALSE  TRUE </span></span>
-<span><span class="co">#&gt;   307    44</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">fd</span>, heavy_isotopologue <span class="op">=</span> <span class="fu"><a href="../reference/isIsotopologue.html">isIsotopologue</a></span><span class="op">(</span><span class="va">isotopes</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   heavy_isotopologue   n</span></span>
+<span><span class="co">#&gt; 1              FALSE 307</span></span>
+<span><span class="co">#&gt; 2               TRUE  44</span></span></code></pre></div>
 </div>
 </section><section class="section level2"><h2 id="adducts-and-fragments">Adducts and fragments<a class="anchor" aria-label="anchor" href="#adducts-and-fragments"></a>
 </h2>

@@ -117,10 +117,10 @@ statistics:
 
 ``` r
 
-table(isIsotopologue(fd$isotopes))
-#> 
-#> FALSE  TRUE 
-#>   307    44
+count(fd, heavy_isotopologue = isIsotopologue(isotopes))
+#>   heavy_isotopologue   n
+#> 1              FALSE 307
+#> 2               TRUE  44
 ```
 
 ## Adducts and fragments

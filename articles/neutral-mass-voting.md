@@ -17,6 +17,7 @@ put them in one group.
 library(IonFamilies)
 #> Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by
 #> 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'
+library(dplyr)
 
 mz <- c(95.0124, 124.0392, 152.0342, 170.0445, 171.0496, 192.0275,
         377.0300, 393.0019)
@@ -64,15 +65,17 @@ M = \frac{|z| \cdot m/z - \Delta m}{n_{mol}}
 ``` r
 
 rules <- defaultAdductRules("positive")
-some <- rules[rules$name %in% c("[M+H]+", "[M+Na]+", "[M+H-H2O]+",
-                                "[M+H-HCOOH]+", "[2M+K]+"), ]
-some[, c("name", "nmol", "charge", "massdiff", "quasi", "ips")]
-#>            name nmol charge   massdiff quasi  ips
-#> 1        [M+H]+    1      1   1.007276     1 1.00
-#> 13      [M+Na]+    1      1  22.989218     1 1.00
-#> 23      [2M+K]+    2      1  38.963158     0 0.75
-#> 62 [M+H-HCOOH]+    1      1 -44.998203     0 0.75
-#> 64   [M+H-H2O]+    1      1 -17.003288     1 0.75
+some <- rules %>%
+    filter(name %in% c("[M+H]+", "[M+Na]+", "[M+H-H2O]+", "[M+H-HCOOH]+",
+                       "[2M+K]+"))
+some %>%
+    select(name, nmol, charge, massdiff, quasi, ips)
+#>           name nmol charge   massdiff quasi  ips
+#> 1       [M+H]+    1      1   1.007276     1 1.00
+#> 2      [M+Na]+    1      1  22.989218     1 1.00
+#> 3      [2M+K]+    2      1  38.963158     0 0.75
+#> 4 [M+H-HCOOH]+    1      1 -44.998203     0 0.75
+#> 5   [M+H-H2O]+    1      1 -17.003288     1 0.75
 round(impliedMasses(mz, some), 4)
 #>        [M+H]+  [M+Na]+  [2M+K]+ [M+H-HCOOH]+ [M+H-H2O]+
 #> [1,]  94.0051  72.0232  28.0246     140.0106   112.0157
@@ -110,8 +113,10 @@ automates that reading for all rules:
 
 keep <- !isIsotopologue(iso)
 votes <- neutralMassVote(mz[keep], int[keep], rules)
-votes$mz <- mz[keep][votes$feature]
-head(votes[, c("hypothesis", "M", "n_ions", "score", "mz", "adduct")], 12)
+votes %>%
+    mutate(mz = mz[keep][feature]) %>%
+    select(hypothesis, M, n_ions, score, mz, adduct) %>%
+    head(12)
 #>    hypothesis         M n_ions score       mz
 #> 1           1 169.03722      5  4.25 170.0445
 #> 2           1 169.03722      5  4.25 192.0275
@@ -155,9 +160,9 @@ reproduces that choice:
 
 hints <- annotateAdducts(mz, AdductVoteParam(), intensity = int,
                          groups = grp, exclude = !keep)
-best <- bestHypotheses(hints)
-best$mz <- mz[best$feature]
-best[, c("mz", "M", "adduct", "n_ions")]
+bestHypotheses(hints) %>%
+    mutate(mz = mz[feature]) %>%
+    select(mz, M, adduct, n_ions)
 #>         mz        M       adduct n_ions
 #> 1 124.0392 169.0372 [M+H-HCOOH]+      5
 #> 2 152.0342 169.0372   [M+H-H2O]+      5
@@ -233,58 +238,58 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] IonFamilies_0.99.2
+#> [1] dplyr_1.2.1        IonFamilies_0.99.2
 #> 
 #> loaded via a namespace (and not attached):
-#>   [1] tidyselect_1.2.1            dplyr_1.2.1                
-#>   [3] farver_2.1.2                S7_0.2.2                   
-#>   [5] fastmap_1.2.0               lazyeval_0.2.3             
-#>   [7] MassSpecWavelet_1.78.2      XML_3.99-0.25              
-#>   [9] digest_0.6.39               lifecycle_1.0.5            
-#>  [11] cluster_2.1.8.3             ProtGenerics_1.44.0        
-#>  [13] PTMods_1.0.0                statmod_1.5.2              
-#>  [15] magrittr_2.0.5              compiler_4.6.2             
-#>  [17] progress_1.2.3              rlang_1.3.0                
-#>  [19] tools_4.6.2                 igraph_2.3.4               
-#>  [21] yaml_2.3.12                 data.table_1.18.6.1        
-#>  [23] knitr_1.52                  prettyunits_1.2.0          
-#>  [25] S4Arrays_1.12.1             DelayedArray_0.38.2        
-#>  [27] plyr_1.8.9                  RColorBrewer_1.1-3         
-#>  [29] abind_1.4-8                 BiocParallel_1.46.0        
-#>  [31] purrr_1.2.2                 BiocGenerics_0.58.1        
-#>  [33] xcms_4.10.1                 grid_4.6.2                 
-#>  [35] stats4_4.6.2                preprocessCore_1.74.0      
-#>  [37] ggplot2_4.0.3               iterators_1.0.14           
-#>  [39] scales_1.4.0                MASS_7.3-66                
-#>  [41] MultiAssayExperiment_1.38.0 SummarizedExperiment_1.42.0
-#>  [43] cli_3.6.6                   crayon_1.5.3               
-#>  [45] mzR_2.46.0                  rmarkdown_2.32             
-#>  [47] generics_0.1.4              otel_0.3.0                 
-#>  [49] reshape2_1.4.5              ncdf4_1.24                 
-#>  [51] DBI_1.3.0                   affy_1.90.0                
-#>  [53] stringr_1.6.0               parallel_4.6.2             
-#>  [55] impute_1.86.0               BiocManager_1.30.27        
-#>  [57] vsn_3.80.0                  AnnotationFilter_1.36.0    
-#>  [59] XVector_0.52.0              matrixStats_1.5.0          
-#>  [61] vctrs_0.7.3                 Matrix_1.7-6               
-#>  [63] jsonlite_2.0.0              hms_1.1.4                  
-#>  [65] IRanges_2.46.0              S4Vectors_0.50.3           
-#>  [67] MsExperiment_1.14.0         MALDIquant_1.22.3          
-#>  [69] clue_0.3-68                 foreach_1.5.2              
-#>  [71] limma_3.68.5                tidyr_1.3.2                
-#>  [73] affyio_1.82.0               glue_1.8.1                 
-#>  [75] MSnbase_2.38.1              codetools_0.2-20           
-#>  [77] QFeatures_1.22.0            Spectra_1.22.2             
-#>  [79] stringi_1.8.9               gtable_0.3.6               
-#>  [81] GenomicRanges_1.64.0        mzID_1.50.0                
-#>  [83] tibble_3.3.1                pillar_1.11.1              
-#>  [85] pcaMethods_2.4.0            MsFeatures_1.20.0          
-#>  [87] htmltools_0.5.9             Seqinfo_1.2.0              
-#>  [89] R6_2.6.1                    doParallel_1.0.17          
-#>  [91] evaluate_1.0.5              lattice_0.23-1             
-#>  [93] Biobase_2.72.0              MetaboCoreUtils_1.20.1     
-#>  [95] Rcpp_1.1.2                  PSMatch_1.16.0             
-#>  [97] SparseArray_1.12.3          xfun_0.62                  
-#>  [99] MsCoreUtils_1.24.0          MatrixGenerics_1.24.0      
-#> [101] fs_2.1.0                    pkgconfig_2.0.3
+#>   [1] DBI_1.3.0                   rlang_1.3.0                
+#>   [3] magrittr_2.0.5              clue_0.3-68                
+#>   [5] MassSpecWavelet_1.78.2      otel_0.3.0                 
+#>   [7] matrixStats_1.5.0           compiler_4.6.2             
+#>   [9] PTMods_1.0.0                vctrs_0.7.3                
+#>  [11] reshape2_1.4.5              stringr_1.6.0              
+#>  [13] ProtGenerics_1.44.0         pkgconfig_2.0.3            
+#>  [15] MetaboCoreUtils_1.20.1      crayon_1.5.3               
+#>  [17] fastmap_1.2.0               XVector_0.52.0             
+#>  [19] rmarkdown_2.32              preprocessCore_1.74.0      
+#>  [21] xcms_4.10.1                 purrr_1.2.2                
+#>  [23] xfun_0.62                   MultiAssayExperiment_1.38.0
+#>  [25] jsonlite_2.0.0              progress_1.2.3             
+#>  [27] DelayedArray_0.38.2         BiocParallel_1.46.0        
+#>  [29] parallel_4.6.2              prettyunits_1.2.0          
+#>  [31] cluster_2.1.8.3             R6_2.6.1                   
+#>  [33] stringi_1.8.9               RColorBrewer_1.1-3         
+#>  [35] limma_3.68.5                GenomicRanges_1.64.0       
+#>  [37] Rcpp_1.1.2                  Seqinfo_1.2.0              
+#>  [39] SummarizedExperiment_1.42.0 iterators_1.0.14           
+#>  [41] knitr_1.52                  IRanges_2.46.0             
+#>  [43] Matrix_1.7-6                igraph_2.3.4               
+#>  [45] tidyselect_1.2.1            abind_1.4-8                
+#>  [47] yaml_2.3.12                 doParallel_1.0.17          
+#>  [49] codetools_0.2-20            affy_1.90.0                
+#>  [51] lattice_0.23-1              tibble_3.3.1               
+#>  [53] plyr_1.8.9                  Biobase_2.72.0             
+#>  [55] withr_3.0.3                 S7_0.2.2                   
+#>  [57] evaluate_1.0.5              Spectra_1.22.2             
+#>  [59] pillar_1.11.1               affyio_1.82.0              
+#>  [61] BiocManager_1.30.27         MatrixGenerics_1.24.0      
+#>  [63] foreach_1.5.2               stats4_4.6.2               
+#>  [65] MSnbase_2.38.1              MALDIquant_1.22.3          
+#>  [67] ncdf4_1.24                  generics_0.1.4             
+#>  [69] S4Vectors_0.50.3            hms_1.1.4                  
+#>  [71] ggplot2_4.0.3               scales_1.4.0               
+#>  [73] MsExperiment_1.14.0         glue_1.8.1                 
+#>  [75] MsFeatures_1.20.0           lazyeval_0.2.3             
+#>  [77] tools_4.6.2                 mzID_1.50.0                
+#>  [79] data.table_1.18.6.1         QFeatures_1.22.0           
+#>  [81] vsn_3.80.0                  mzR_2.46.0                 
+#>  [83] fs_2.1.0                    XML_3.99-0.25              
+#>  [85] grid_4.6.2                  impute_1.86.0              
+#>  [87] tidyr_1.3.2                 MsCoreUtils_1.24.0         
+#>  [89] PSMatch_1.16.0              cli_3.6.6                  
+#>  [91] S4Arrays_1.12.1             AnnotationFilter_1.36.0    
+#>  [93] pcaMethods_2.4.0            gtable_0.3.6               
+#>  [95] digest_0.6.39               BiocGenerics_0.58.1        
+#>  [97] SparseArray_1.12.3          farver_2.1.2               
+#>  [99] htmltools_0.5.9             lifecycle_1.0.5            
+#> [101] statmod_1.5.2               MASS_7.3-66
 ```
