@@ -15,6 +15,8 @@ put them in one group.
 ``` r
 
 library(IonFamilies)
+#> Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by
+#> 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'
 
 mz <- c(95.0124, 124.0392, 152.0342, 170.0445, 171.0496, 192.0275,
         377.0300, 393.0019)
@@ -231,7 +233,7 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] IonFamilies_0.99.0
+#> [1] IonFamilies_0.99.1
 #> 
 #> loaded via a namespace (and not attached):
 #>   [1] tidyselect_1.2.1            dplyr_1.2.1                

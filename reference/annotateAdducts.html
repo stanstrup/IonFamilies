@@ -13,7 +13,7 @@ alternatives."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">IonFamilies</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -104,14 +104,14 @@ out, normally heavy isotopologues (<code>isIsotopologue(labels)</code>). The
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>For the <code>numeric</code> method a <code>data.frame</code> with one row per
-hypothesis and feature and the columns <code>feature</code> (index), <code>group</code>,
+hypothesis and feature and the columns <code>feature</code> (index),
+<code>feature_group</code>,
 <code>hypothesis</code> (rank within the group), <code>rank</code> (rank for this feature,
 1 = most plausible), <code>M</code> (neutral mass), <code>adduct</code> (rule name),
 <code>n_ions</code> (number of features supporting <code>M</code>), <code>score</code> and
 <code>intensity</code>. For the <code>XcmsExperiment</code> method the object, with the
-columns <code>adduct</code> (the best <code>nBest</code> hints as text), <code>adduct_hints</code> (a
-list column with all hypotheses per feature) and <code>pcgroup</code> (integer
-group number, 1 = group with the most intense feature) added to
+columns <code>adduct</code> (the best <code>nBest</code> hints as text) and <code>adduct_hints</code>
+(a list column with all hypotheses per feature) added to
 <code><a href="https://rdrr.io/pkg/xcms/man/XCMSnExp-class.html" class="external-link">featureDefinitions()</a></code>, and the parameters in
 <code>metadata(object)$IonFamilies$adducts</code>.</p>
     </div>
@@ -132,20 +132,20 @@ group number, 1 = group with the most intense feature) added to
 <span class="r-in"><span><span class="va">hints</span> <span class="op">&lt;-</span> <span class="fu">annotateAdducts</span><span class="op">(</span><span class="va">mz</span>, <span class="fu"><a href="AdductVoteParam.html">AdductVoteParam</a></span><span class="op">(</span><span class="op">)</span>, intensity <span class="op">=</span> <span class="va">int</span>,</span></span>
 <span class="r-in"><span>                         groups <span class="op">=</span> <span class="va">grp</span>, exclude <span class="op">=</span> <span class="fu"><a href="isIsotopologue.html">isIsotopologue</a></span><span class="op">(</span><span class="va">iso</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">hints</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   feature group hypothesis rank         M                                adduct</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1       1  FG.1          2    1 151.02692 [M+H - O=C=NCH3 (methyl isocyanate)]+</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2       1  FG.1          3    2 147.05528                    [M+H-NH3-H2O-H2O]+</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3       1  FG.1          4    3  94.00512                                [M+H]+</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4       1  FG.1          9    4 152.01065                         [M+H-C2H2O2]+</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5       1  FG.1         10    5 129.04498                        [M+H-NH3-H2O]+</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6       2  FG.1          1    1 169.03722                          [M+H-HCOOH]+</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   n_ions score intensity</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1      3  2.25    202.80</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      3  2.25    182.90</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3      2  2.00     73.36</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4      2  1.50    171.60</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5      2  1.50    121.40</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6      5  4.25    244.26</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   feature feature_group hypothesis rank         M</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       1          FG.1          2    1 151.02692</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2       1          FG.1          3    2 147.05528</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3       1          FG.1          4    3  94.00512</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4       1          FG.1          9    4 152.01065</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5       1          FG.1         10    5 129.04498</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6       2          FG.1          1    1 169.03722</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                  adduct n_ions score intensity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 [M+H - O=C=NCH3 (methyl isocyanate)]+      3  2.25    202.80</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                    [M+H-NH3-H2O-H2O]+      3  2.25    182.90</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                                [M+H]+      2  2.00     73.36</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                         [M+H-C2H2O2]+      2  1.50    171.60</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                        [M+H-NH3-H2O]+      2  1.50    121.40</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                          [M+H-HCOOH]+      5  4.25    244.26</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -62,14 +62,13 @@ annotateAdducts(object, param, ...)
 ## Value
 
 For the `numeric` method a `data.frame` with one row per hypothesis and
-feature and the columns `feature` (index), `group`, `hypothesis` (rank
-within the group), `rank` (rank for this feature, 1 = most plausible),
-`M` (neutral mass), `adduct` (rule name), `n_ions` (number of features
-supporting `M`), `score` and `intensity`. For the `XcmsExperiment`
-method the object, with the columns `adduct` (the best `nBest` hints as
-text), `adduct_hints` (a list column with all hypotheses per feature)
-and `pcgroup` (integer group number, 1 = group with the most intense
-feature) added to
+feature and the columns `feature` (index), `feature_group`, `hypothesis`
+(rank within the group), `rank` (rank for this feature, 1 = most
+plausible), `M` (neutral mass), `adduct` (rule name), `n_ions` (number
+of features supporting `M`), `score` and `intensity`. For the
+`XcmsExperiment` method the object, with the columns `adduct` (the best
+`nBest` hints as text) and `adduct_hints` (a list column with all
+hypotheses per feature) added to
 [`featureDefinitions()`](https://rdrr.io/pkg/xcms/man/XCMSnExp-class.html),
 and the parameters in `metadata(object)$IonFamilies$adducts`.
 
@@ -93,18 +92,18 @@ iso <- annotateIsotopes(mz, IsotopologueParam(), intensity = int,
 hints <- annotateAdducts(mz, AdductVoteParam(), intensity = int,
                          groups = grp, exclude = isIsotopologue(iso))
 head(hints)
-#>   feature group hypothesis rank         M                                adduct
-#> 1       1  FG.1          2    1 151.02692 [M+H - O=C=NCH3 (methyl isocyanate)]+
-#> 2       1  FG.1          3    2 147.05528                    [M+H-NH3-H2O-H2O]+
-#> 3       1  FG.1          4    3  94.00512                                [M+H]+
-#> 4       1  FG.1          9    4 152.01065                         [M+H-C2H2O2]+
-#> 5       1  FG.1         10    5 129.04498                        [M+H-NH3-H2O]+
-#> 6       2  FG.1          1    1 169.03722                          [M+H-HCOOH]+
-#>   n_ions score intensity
-#> 1      3  2.25    202.80
-#> 2      3  2.25    182.90
-#> 3      2  2.00     73.36
-#> 4      2  1.50    171.60
-#> 5      2  1.50    121.40
-#> 6      5  4.25    244.26
+#>   feature feature_group hypothesis rank         M
+#> 1       1          FG.1          2    1 151.02692
+#> 2       1          FG.1          3    2 147.05528
+#> 3       1          FG.1          4    3  94.00512
+#> 4       1          FG.1          9    4 152.01065
+#> 5       1          FG.1         10    5 129.04498
+#> 6       2          FG.1          1    1 169.03722
+#>                                  adduct n_ions score intensity
+#> 1 [M+H - O=C=NCH3 (methyl isocyanate)]+      3  2.25    202.80
+#> 2                    [M+H-NH3-H2O-H2O]+      3  2.25    182.90
+#> 3                                [M+H]+      2  2.00     73.36
+#> 4                         [M+H-C2H2O2]+      2  1.50    171.60
+#> 5                        [M+H-NH3-H2O]+      2  1.50    121.40
+#> 6                          [M+H-HCOOH]+      5  4.25    244.26
 ```

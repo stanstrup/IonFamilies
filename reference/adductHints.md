@@ -47,18 +47,18 @@ if (requireNamespace("faahKO", quietly = TRUE)) {
     head(adductHints(x))
 }
 #> No isotope annotation found; consider running 'annotateIsotopes()' first so that heavy isotopologues are not used as adducts.
-#>   feature  group hypothesis rank        M              adduct n_ions score
-#> 1       2 FG.005          2    1 263.0662        [M+H-C3H9N]+      2  1.50
-#> 2       2 FG.005          3    2 296.0368 [M+H-C2H4O2-CH3OH]+      2  1.50
-#> 3       2 FG.005          5    3 296.0033  [M+H-HCOOH-HCOOH]+      2  1.25
-#> 4       3 FG.005          1    1 240.0368      [M+H-NH3-H2O]+      2  1.50
-#> 5       3 FG.005          4    2 275.0368        [M+H-C4H6O]+      2  1.50
-#> 6       4 FG.078          1    1 301.1033  [M+H-S-NH3-HCOOH]+      2  1.25
-#>    intensity
-#> 1  1948834.6
-#> 2  1932821.3
-#> 3 14730092.5
-#> 4 13328259.5
-#> 5   501911.2
-#> 6  1093366.1
+#>   feature feature_group hypothesis rank        M              adduct n_ions
+#> 1       2        FG.005          2    1 263.0662        [M+H-C3H9N]+      2
+#> 2       2        FG.005          3    2 296.0368 [M+H-C2H4O2-CH3OH]+      2
+#> 3       2        FG.005          5    3 296.0033  [M+H-HCOOH-HCOOH]+      2
+#> 4       3        FG.005          1    1 240.0368      [M+H-NH3-H2O]+      2
+#> 5       3        FG.005          4    2 275.0368        [M+H-C4H6O]+      2
+#> 6       4        FG.078          1    1 301.1033  [M+H-S-NH3-HCOOH]+      2
+#>   score  intensity
+#> 1  1.50  1948834.6
+#> 2  1.50  1932821.3
+#> 3  1.25 14730092.5
+#> 4  1.50 13328259.5
+#> 5  1.50   501911.2
+#> 6  1.25  1093366.1
 ```

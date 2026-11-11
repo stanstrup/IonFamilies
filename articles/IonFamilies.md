@@ -27,9 +27,11 @@ annotations are meant as **hints** for what to check, so the default
 rule list is long and recall is preferred over precision. Results are
 written to the
 [`featureDefinitions()`](https://rdrr.io/pkg/xcms/man/XCMSnExp-class.html)
-of the `XcmsExperiment` in the format CAMERA used (`pcgroup`,
-`isotopes`, `adduct`), so existing downstream code keeps working. The
-vignette *How neutral-mass voting works* explains the method step by
+of the `XcmsExperiment`: the `isotopes` and `adduct` columns use
+CAMERA’s text syntax, and the grouping itself is the `feature_group`
+column written by
+[`groupFeatures()`](https://rdrr.io/pkg/MsFeatures/man/groupFeatures.html).
+The vignette *How neutral-mass voting works* explains the method step by
 step.
 
 ### Related packages
@@ -65,6 +67,8 @@ samples.
 ``` r
 
 library(xcms)
+#> Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by
+#> 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'
 library(MsFeatures)
 library(IonFamilies)
 
@@ -138,83 +142,112 @@ head(rules)
 #> 6 [2M+2H]2+    2      2 2.014552        2     0 0.75
 ```
 
-`nBest` sets how many hypotheses per feature are written to the `adduct`
-column. All of them are stored in any case.
+Every feature of a group is tried as every quasi-molecular ion in the
+rules (such as `[M+H]+` or `[M+Na]+`). A neutral mass M becomes a
+hypothesis when at least one other feature of the same group is
+explained by some rule as an ion of that M. Heavy isotopologues found in
+the previous step are left out.
 
 ``` r
 
-x <- annotateAdducts(x, AdductVoteParam(polarity = "positive", nBest = 2))
-fd <- featureDefinitions(x)
-head(fd[fd$adduct != "", c("mzmed", "pcgroup", "isotopes", "adduct")])
-#>       mzmed pcgroup isotopes                                 adduct
-#> FT002 205.0      55                            [M+H-C3H9N]+ 263.066
-#> FT003 206.0     146                            [M+H-C4H6O]+ 275.037
-#> FT004 207.1      80                      [M+H-S-NH3-HCOOH]+ 301.103
-#> FT021 281.2      41          [M+H-HCOOH]+ 326.203 [M+H-CO]+ 308.193
-#> FT022 281.1      55                                [M+NH4]+ 263.066
-#> FT027 284.1      80                              [M+H-H2O]+ 301.103
-```
-
-The full table of hypotheses, one row per hypothesis and feature, is
-returned by
-[`adductHints()`](https://stanstrup.github.io/IonFamilies/reference/adductHints.md).
-`rank` is the rank of the hypothesis for that feature and `n_ions` the
-number of features that support the neutral mass.
-
-``` r
-
+x <- annotateAdducts(x, AdductVoteParam(polarity = "positive"))
 hints <- adductHints(x)
-head(hints)
-#>   feature      group hypothesis rank        M             adduct n_ions score
-#> 1       2 FG.005.002          1    1 263.0662       [M+H-C3H9N]+      2  1.50
-#> 2       3 FG.005.001          1    1 275.0368       [M+H-C4H6O]+      2  1.50
-#> 3       4 FG.078.001          1    1 301.1033 [M+H-S-NH3-HCOOH]+      2  1.25
-#> 4      21 FG.001.001          1    1 326.2033       [M+H-HCOOH]+      3  1.75
-#> 5      21 FG.001.001          2    2 308.1927          [M+H-CO]+      2  1.75
-#> 6      22 FG.005.002          1    1 263.0662           [M+NH4]+      2  1.50
-#>   intensity
-#> 1 1948834.6
-#> 2  501911.2
-#> 3 1093366.1
-#> 4 2844075.4
-#> 5 2341545.7
-#> 6 1948834.6
 ```
 
-The text column can be rewritten with another `nBest` without
-recomputing:
+[`adductHints()`](https://stanstrup.github.io/IonFamilies/reference/adductHints.md)
+returns all hypotheses as one table, with one row per hypothesis and
+feature. `hypothesis` ranks the hypotheses within a group by `score`
+(the summed rule scores), and `n_ions` is the number of features that
+support M.
+
+To see how this works, we look at the group with the most competing
+hypotheses:
 
 ``` r
 
-x <- formatAdducts(x, nBest = 1)
-head(featureDefinitions(x)$adduct[featureDefinitions(x)$adduct != ""])
-#> [1] "[M+H-C3H9N]+ 263.066"       "[M+H-C4H6O]+ 275.037"      
-#> [3] "[M+H-S-NH3-HCOOH]+ 301.103" "[M+H-HCOOH]+ 326.203"      
-#> [5] "[M+NH4]+ 263.066"           "[M+H-H2O]+ 301.103"
+group <- names(which.max(tapply(hints$hypothesis, hints$feature_group, max)))
+fd <- featureDefinitions(x)
+fd[fd$feature_group == group, c("mzmed", "rtmed", "isotopes")]
+#>       mzmed    rtmed   isotopes
+#> FT040 305.1 3504.720           
+#> FT093 351.1 3503.953   [15][M]+
+#> FT095 353.1 3504.855 [15][M+2]+
 ```
+
+The group has 3 features. One of them is a heavy isotopologue (`[M+1]+`
+or `[M+2]+`) and gets no adduct hypotheses. The hypotheses of the others
+are:
+
+``` r
+
+group_hints <- hints[hints$feature_group == group, ]
+group_hints$mzmed <- fd$mzmed[group_hints$feature]
+group_hints[order(group_hints$hypothesis, group_hints$mzmed),
+            c("hypothesis", "M", "n_ions", "score", "mzmed", "adduct", "rank")]
+#>    hypothesis        M n_ions score mzmed           adduct rank
+#> 9           1 350.0927      2  1.75 305.1     [M+H-HCOOH]+    1
+#> 24          1 350.0927      2  1.75 351.1           [M+H]+    1
+#> 10          2 282.1108      2  1.50 305.1          [M+Na]+    2
+#> 25          2 282.1108      2  1.50 351.1    [M+H+CHOONa]+    2
+#> 11          3 368.1033      2  1.25 305.1 [M+H-H2O-HCOOH]+    3
+#> 26          3 368.1033      2  1.25 351.1       [M+H-H2O]+    3
+```
+
+Each hypothesis explains the same features in a different way. The best
+one, M = 350.093, reads them as \[M+H-HCOOH\]+ and \[M+H\]+. The others
+are alternatives that the long rule list also allows. This is why the
+annotations are hints: they tell you what to check, not what the
+compound is. Note that this example data set is small and of low mass
+accuracy, so the hypotheses here are weak. The section [Working with
+plain vectors](#working-with-plain-vectors) shows a clear case.
+
+### The adduct column
+
+`rank` is the rank of a hypothesis for one feature (1 = most plausible).
+The `adduct` column of
+[`featureDefinitions()`](https://rdrr.io/pkg/xcms/man/XCMSnExp-class.html)
+shows the `nBest` best hypotheses of each feature as text in CAMERA’s
+format, best first. The default is `nBest = 3`.
+[`formatAdducts()`](https://stanstrup.github.io/IonFamilies/reference/formatAdducts.md)
+rewrites the column with another `nBest` without recomputing anything:
+
+``` r
+
+x1 <- formatAdducts(x, nBest = 1)
+in_group <- fd$feature_group == group
+data.frame(mzmed = fd$mzmed[in_group],
+           nBest_3 = fd$adduct[in_group],
+           nBest_1 = featureDefinitions(x1)$adduct[in_group])
+#>   mzmed                                                       nBest_3
+#> 1 305.1 [M+H-HCOOH]+ 350.093 [M+Na]+ 282.111 [M+H-H2O-HCOOH]+ 368.103
+#> 2 351.1       [M+H]+ 350.093 [M+H+CHOONa]+ 282.111 [M+H-H2O]+ 368.103
+#> 3 353.1                                                              
+#>                nBest_1
+#> 1 [M+H-HCOOH]+ 350.093
+#> 2       [M+H]+ 350.093
+#> 3
+```
+
+### One hypothesis per feature
 
 [`bestHypotheses()`](https://stanstrup.github.io/IonFamilies/reference/bestHypotheses.md)
 reduces the hints to at most one neutral mass per feature, as CAMERA’s
-final result did:
+final result did. Hypotheses are accepted from the best down, and one is
+skipped if any of its features is already explained:
 
 ``` r
 
-head(bestHypotheses(hints))
-#>   feature      group hypothesis rank        M       adduct n_ions score
-#> 1      21 FG.001.001          1    1 326.2033 [M+H-HCOOH]+      3  1.75
-#> 2      46 FG.001.001          1    1 326.2033   [M+H-H2O]+      3  1.75
-#> 3      76 FG.001.001          1    1 326.2033  [2M+H+Na]2+      3  1.75
-#> 4       3 FG.005.001          1    1 275.0368 [M+H-C4H6O]+      2  1.50
-#> 5      54 FG.005.001          1    1 275.0368       [M+K]+      2  1.50
-#> 6       2 FG.005.002          1    1 263.0662 [M+H-C3H9N]+      2  1.50
-#>   intensity
-#> 1 2844075.4
-#> 2 2844075.4
-#> 3 2844075.4
-#> 4  501911.2
-#> 5  501911.2
-#> 6 1948834.6
+best <- bestHypotheses(hints)
+best[best$feature_group == group, ]
+#>    feature feature_group hypothesis rank        M       adduct n_ions score
+#> 17      40    FG.030.001          1    1 350.0927 [M+H-HCOOH]+      2  1.75
+#> 18      93    FG.030.001          1    1 350.0927       [M+H]+      2  1.75
+#>    intensity
+#> 17  822876.7
+#> 18  822876.7
 ```
+
+### Stored parameters
 
 The parameters used are stored in the object:
 
@@ -237,7 +270,7 @@ S4Vectors::metadata(x)$IonFamilies
 #>  polarity: positive 
 #>  value: into 
 #>  subset: all samples 
-#>  nBest: 1
+#>  nBest: 3
 ```
 
 ## Working with plain vectors
@@ -279,6 +312,25 @@ data.frame(mz, isotopes = iso,
 #> 8                                                           [M+K]+ 354.041
 ```
 
+Here the best hypothesis is the right one. Five ions agree on M =
+169.037: the protonated molecule, the sodium adduct, the potassium
+adduct of the dimer, and two in-source fragments (losses of water and of
+formic acid). The feature at m/z 171.050 is the `[M+1]+` isotope of the
+protonated molecule and is therefore left out:
+
+``` r
+
+best <- hints[hints$hypothesis == 1, ]
+data.frame(mz = mz[best$feature], adduct = best$adduct,
+           M = round(best$M, 4))
+#>         mz       adduct        M
+#> 1 124.0392 [M+H-HCOOH]+ 169.0372
+#> 2 152.0342   [M+H-H2O]+ 169.0372
+#> 3 170.0445       [M+H]+ 169.0372
+#> 4 192.0275      [M+Na]+ 169.0372
+#> 5 377.0300      [2M+K]+ 169.0372
+```
+
 ## Session information
 
 ``` r
@@ -305,7 +357,7 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] IonFamilies_0.99.0  MsFeatures_1.20.0   xcms_4.10.1        
+#> [1] IonFamilies_0.99.1  MsFeatures_1.20.0   xcms_4.10.1        
 #> [4] BiocParallel_1.46.0
 #> 
 #> loaded via a namespace (and not attached):

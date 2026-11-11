@@ -32,10 +32,16 @@ hints <- annotateAdducts(mz, AdductVoteParam(),
                          intensity = c(81, 50, 100, 11, 2),
                          groups = rep("FG.1", 5))
 bestHypotheses(hints)
-#>   feature group hypothesis rank        M       adduct n_ions score intensity
-#> 1       1  FG.1          1    1 169.0372 [M+H-HCOOH]+      5  4.25       244
-#> 2       2  FG.1          1    1 169.0372   [M+H-H2O]+      5  4.25       244
-#> 3       3  FG.1          1    1 169.0372       [M+H]+      5  4.25       244
-#> 4       4  FG.1          1    1 169.0372      [M+Na]+      5  4.25       244
-#> 5       5  FG.1          1    1 169.0372      [2M+K]+      5  4.25       244
+#>   feature feature_group hypothesis rank        M       adduct n_ions score
+#> 1       1          FG.1          1    1 169.0372 [M+H-HCOOH]+      5  4.25
+#> 2       2          FG.1          1    1 169.0372   [M+H-H2O]+      5  4.25
+#> 3       3          FG.1          1    1 169.0372       [M+H]+      5  4.25
+#> 4       4          FG.1          1    1 169.0372      [M+Na]+      5  4.25
+#> 5       5          FG.1          1    1 169.0372      [2M+K]+      5  4.25
+#>   intensity
+#> 1       244
+#> 2       244
+#> 3       244
+#> 4       244
+#> 5       244
 ```
