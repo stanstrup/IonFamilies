@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   IonFamilies: IonFamilies.html
   neutral-mass-voting: neutral-mass-voting.html
-last_built: 2026-11-11T08:19Z
+last_built: 2026-11-11T08:32Z
 urls:
   reference: https://stanstrup.github.io/IonFamilies/reference
   article: https://stanstrup.github.io/IonFamilies/articles

@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">IonFamilies</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -106,6 +106,7 @@
 <span><span class="co">#&gt; 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/RforMassSpectrometry/MsFeatures" class="external-link">MsFeatures</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://stanstrup.github.io/IonFamilies">IonFamilies</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/xcms/man/loadXcmsData.html" class="external-link">loadXcmsData</a></span><span class="op">(</span><span class="st">"xmse"</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MsFeatures/man/groupFeatures.html" class="external-link">groupFeatures</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/pkg/MsFeatures/man/groupFeatures-similar-rtime.html" class="external-link">SimilarRtimeParam</a></span><span class="op">(</span>diffRt <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
@@ -123,8 +124,11 @@
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/annotateIsotopes.html">annotateIsotopes</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="../reference/IsotopologueParam.html">IsotopologueParam</a></span><span class="op">(</span>ppm <span class="op">=</span> <span class="fl">10</span>, tolerance <span class="op">=</span> <span class="fl">0.005</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">fd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/xcms/man/XCMSnExp-class.html" class="external-link">featureDefinitions</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">fd</span><span class="op">[</span><span class="va">fd</span><span class="op">$</span><span class="va">isotopes</span> <span class="op">!=</span> <span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mzmed"</span>, <span class="st">"rtmed"</span>, <span class="st">"feature_group"</span>, <span class="st">"isotopes"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">fd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/xcms/man/XCMSnExp-class.html" class="external-link">featureDefinitions</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">fd</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">isotopes</span> <span class="op">!=</span> <span class="st">""</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">mzmed</span>, <span class="va">rtmed</span>, <span class="va">feature_group</span>, <span class="va">isotopes</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt;       mzmed    rtmed feature_group   isotopes</span></span>
 <span><span class="co">#&gt; FT033 300.2 3404.692    FG.002.001    [1][M]+</span></span>
 <span><span class="co">#&gt; FT034 301.0 2789.217    FG.006.001    [4][M]+</span></span>
@@ -168,9 +172,17 @@
 <p>To see how this works, we look at the group with the most competing hypotheses:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">group</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">hints</span><span class="op">$</span><span class="va">hypothesis</span>, <span class="va">hints</span><span class="op">$</span><span class="va">feature_group</span>, <span class="va">max</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">fd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/xcms/man/XCMSnExp-class.html" class="external-link">featureDefinitions</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
-<span><span class="va">fd</span><span class="op">[</span><span class="va">fd</span><span class="op">$</span><span class="va">feature_group</span> <span class="op">==</span> <span class="va">group</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mzmed"</span>, <span class="st">"rtmed"</span>, <span class="st">"isotopes"</span><span class="op">)</span><span class="op">]</span></span>
+<code class="sourceCode R"><span><span class="va">group</span> <span class="op">&lt;-</span> <span class="va">hints</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_max</a></span><span class="op">(</span><span class="va">hypothesis</span>, n <span class="op">=</span> <span class="fl">1</span>, with_ties <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">feature_group</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/xcms/man/XCMSnExp-class.html" class="external-link">featureDefinitions</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>feature <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/row_number.html" class="external-link">row_number</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fd</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">feature_group</span> <span class="op">==</span> <span class="va">group</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">mzmed</span>, <span class="va">rtmed</span>, <span class="va">isotopes</span><span class="op">)</span></span>
 <span><span class="co">#&gt;       mzmed    rtmed   isotopes</span></span>
 <span><span class="co">#&gt; FT040 305.1 3504.720           </span></span>
 <span><span class="co">#&gt; FT093 351.1 3503.953   [15][M]+</span></span>
@@ -179,17 +191,20 @@
 <p>The group has 3 features. One of them is a heavy isotopologue (<code>[M+1]+</code> or <code>[M+2]+</code>) and gets no adduct hypotheses. The hypotheses of the others are:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">group_hints</span> <span class="op">&lt;-</span> <span class="va">hints</span><span class="op">[</span><span class="va">hints</span><span class="op">$</span><span class="va">feature_group</span> <span class="op">==</span> <span class="va">group</span>, <span class="op">]</span></span>
-<span><span class="va">group_hints</span><span class="op">$</span><span class="va">mzmed</span> <span class="op">&lt;-</span> <span class="va">fd</span><span class="op">$</span><span class="va">mzmed</span><span class="op">[</span><span class="va">group_hints</span><span class="op">$</span><span class="va">feature</span><span class="op">]</span></span>
-<span><span class="va">group_hints</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">group_hints</span><span class="op">$</span><span class="va">hypothesis</span>, <span class="va">group_hints</span><span class="op">$</span><span class="va">mzmed</span><span class="op">)</span>,</span>
-<span>            <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hypothesis"</span>, <span class="st">"M"</span>, <span class="st">"n_ions"</span>, <span class="st">"score"</span>, <span class="st">"mzmed"</span>, <span class="st">"adduct"</span>, <span class="st">"rank"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt;    hypothesis        M n_ions score mzmed           adduct rank</span></span>
-<span><span class="co">#&gt; 9           1 350.0927      2  1.75 305.1     [M+H-HCOOH]+    1</span></span>
-<span><span class="co">#&gt; 24          1 350.0927      2  1.75 351.1           [M+H]+    1</span></span>
-<span><span class="co">#&gt; 10          2 282.1108      2  1.50 305.1          [M+Na]+    2</span></span>
-<span><span class="co">#&gt; 25          2 282.1108      2  1.50 351.1    [M+H+CHOONa]+    2</span></span>
-<span><span class="co">#&gt; 11          3 368.1033      2  1.25 305.1 [M+H-H2O-HCOOH]+    3</span></span>
-<span><span class="co">#&gt; 26          3 368.1033      2  1.25 351.1       [M+H-H2O]+    3</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">group_hints</span> <span class="op">&lt;-</span> <span class="va">hints</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">feature_group</span> <span class="op">==</span> <span class="va">group</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">fd</span>, <span class="va">feature</span>, <span class="va">mzmed</span><span class="op">)</span>, by <span class="op">=</span> <span class="st">"feature"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">hypothesis</span>, <span class="va">mzmed</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">group_hints</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">hypothesis</span>, <span class="va">M</span>, <span class="va">n_ions</span>, <span class="va">score</span>, <span class="va">mzmed</span>, <span class="va">adduct</span>, <span class="va">rank</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   hypothesis        M n_ions score mzmed           adduct rank</span></span>
+<span><span class="co">#&gt; 1          1 350.0927      2  1.75 305.1     [M+H-HCOOH]+    1</span></span>
+<span><span class="co">#&gt; 2          1 350.0927      2  1.75 351.1           [M+H]+    1</span></span>
+<span><span class="co">#&gt; 3          2 282.1108      2  1.50 305.1          [M+Na]+    2</span></span>
+<span><span class="co">#&gt; 4          2 282.1108      2  1.50 351.1    [M+H+CHOONa]+    2</span></span>
+<span><span class="co">#&gt; 5          3 368.1033      2  1.25 305.1 [M+H-H2O-HCOOH]+    3</span></span>
+<span><span class="co">#&gt; 6          3 368.1033      2  1.25 351.1       [M+H-H2O]+    3</span></span></code></pre></div>
 </div>
 <p>Each hypothesis explains the same features in a different way. The best one, M = 350.093, reads them as [M+H-HCOOH]+ and [M+H]+. The others are alternatives that the long rule list also allows. This is why the annotations are hints: they tell you what to check, not what the compound is. Note that this example data set is small and of low mass accuracy, so the hypotheses here are weak. The section <a href="#working-with-plain-vectors">Working with plain vectors</a> shows a clear case.</p>
 <section class="level2"><h3 id="the-adduct-column">The adduct column<a class="anchor" aria-label="anchor" href="#the-adduct-column"></a>
@@ -198,32 +213,33 @@
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/formatAdducts.html">formatAdducts</a></span><span class="op">(</span><span class="va">x</span>, nBest <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">in_group</span> <span class="op">&lt;-</span> <span class="va">fd</span><span class="op">$</span><span class="va">feature_group</span> <span class="op">==</span> <span class="va">group</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>mzmed <span class="op">=</span> <span class="va">fd</span><span class="op">$</span><span class="va">mzmed</span><span class="op">[</span><span class="va">in_group</span><span class="op">]</span>,</span>
-<span>           nBest_3 <span class="op">=</span> <span class="va">fd</span><span class="op">$</span><span class="va">adduct</span><span class="op">[</span><span class="va">in_group</span><span class="op">]</span>,</span>
-<span>           nBest_1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/xcms/man/XCMSnExp-class.html" class="external-link">featureDefinitions</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span><span class="op">$</span><span class="va">adduct</span><span class="op">[</span><span class="va">in_group</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   mzmed                                                       nBest_3</span></span>
-<span><span class="co">#&gt; 1 305.1 [M+H-HCOOH]+ 350.093 [M+Na]+ 282.111 [M+H-H2O-HCOOH]+ 368.103</span></span>
-<span><span class="co">#&gt; 2 351.1       [M+H]+ 350.093 [M+H+CHOONa]+ 282.111 [M+H-H2O]+ 368.103</span></span>
-<span><span class="co">#&gt; 3 353.1                                                              </span></span>
-<span><span class="co">#&gt;                nBest_1</span></span>
-<span><span class="co">#&gt; 1 [M+H-HCOOH]+ 350.093</span></span>
-<span><span class="co">#&gt; 2       [M+H]+ 350.093</span></span>
-<span><span class="co">#&gt; 3</span></span></code></pre></div>
+<span></span>
+<span><span class="va">fd</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>nBest_1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/xcms/man/XCMSnExp-class.html" class="external-link">featureDefinitions</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span><span class="op">$</span><span class="va">adduct</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">feature_group</span> <span class="op">==</span> <span class="va">group</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">mzmed</span>, nBest_3 <span class="op">=</span> <span class="va">adduct</span>, <span class="va">nBest_1</span><span class="op">)</span></span>
+<span><span class="co">#&gt;       mzmed                                                       nBest_3</span></span>
+<span><span class="co">#&gt; FT040 305.1 [M+H-HCOOH]+ 350.093 [M+Na]+ 282.111 [M+H-H2O-HCOOH]+ 368.103</span></span>
+<span><span class="co">#&gt; FT093 351.1       [M+H]+ 350.093 [M+H+CHOONa]+ 282.111 [M+H-H2O]+ 368.103</span></span>
+<span><span class="co">#&gt; FT095 353.1                                                              </span></span>
+<span><span class="co">#&gt;                    nBest_1</span></span>
+<span><span class="co">#&gt; FT040 [M+H-HCOOH]+ 350.093</span></span>
+<span><span class="co">#&gt; FT093       [M+H]+ 350.093</span></span>
+<span><span class="co">#&gt; FT095</span></span></code></pre></div>
 </div>
 </section><section class="level2"><h3 id="one-hypothesis-per-feature">One hypothesis per feature<a class="anchor" aria-label="anchor" href="#one-hypothesis-per-feature"></a>
 </h3>
 <p><code><a href="../reference/bestHypotheses.html">bestHypotheses()</a></code> reduces the hints to at most one neutral mass per feature, as CAMERA’s final result did. Hypotheses are accepted from the best down, and one is skipped if any of its features is already explained:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">best</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bestHypotheses.html">bestHypotheses</a></span><span class="op">(</span><span class="va">hints</span><span class="op">)</span></span>
-<span><span class="va">best</span><span class="op">[</span><span class="va">best</span><span class="op">$</span><span class="va">feature_group</span> <span class="op">==</span> <span class="va">group</span>, <span class="op">]</span></span>
-<span><span class="co">#&gt;    feature feature_group hypothesis rank        M       adduct n_ions score</span></span>
-<span><span class="co">#&gt; 17      40    FG.030.001          1    1 350.0927 [M+H-HCOOH]+      2  1.75</span></span>
-<span><span class="co">#&gt; 18      93    FG.030.001          1    1 350.0927       [M+H]+      2  1.75</span></span>
-<span><span class="co">#&gt;    intensity</span></span>
-<span><span class="co">#&gt; 17  822876.7</span></span>
-<span><span class="co">#&gt; 18  822876.7</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/bestHypotheses.html">bestHypotheses</a></span><span class="op">(</span><span class="va">hints</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">feature_group</span> <span class="op">==</span> <span class="va">group</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   feature feature_group hypothesis rank        M       adduct n_ions score</span></span>
+<span><span class="co">#&gt; 1      40    FG.030.001          1    1 350.0927 [M+H-HCOOH]+      2  1.75</span></span>
+<span><span class="co">#&gt; 2      93    FG.030.001          1    1 350.0927       [M+H]+      2  1.75</span></span>
+<span><span class="co">#&gt;   intensity</span></span>
+<span><span class="co">#&gt; 1  822876.7</span></span>
+<span><span class="co">#&gt; 2  822876.7</span></span></code></pre></div>
 </div>
 </section><section class="level2"><h3 id="stored-parameters">Stored parameters<a class="anchor" aria-label="anchor" href="#stored-parameters"></a>
 </h3>
@@ -287,9 +303,10 @@
 <p>Here the best hypothesis is the right one. Five ions agree on M = 169.037: the protonated molecule, the sodium adduct, the potassium adduct of the dimer, and two in-source fragments (losses of water and of formic acid). The feature at m/z 171.050 is the <code>[M+1]+</code> isotope of the protonated molecule and is therefore left out:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">best</span> <span class="op">&lt;-</span> <span class="va">hints</span><span class="op">[</span><span class="va">hints</span><span class="op">$</span><span class="va">hypothesis</span> <span class="op">==</span> <span class="fl">1</span>, <span class="op">]</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>mz <span class="op">=</span> <span class="va">mz</span><span class="op">[</span><span class="va">best</span><span class="op">$</span><span class="va">feature</span><span class="op">]</span>, adduct <span class="op">=</span> <span class="va">best</span><span class="op">$</span><span class="va">adduct</span>,</span>
-<span>           M <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">best</span><span class="op">$</span><span class="va">M</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">hints</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">hypothesis</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>mz <span class="op">=</span> <span class="va">mz</span><span class="op">[</span><span class="va">feature</span><span class="op">]</span>, M <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">M</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">mz</span>, <span class="va">adduct</span>, <span class="va">M</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         mz       adduct        M</span></span>
 <span><span class="co">#&gt; 1 124.0392 [M+H-HCOOH]+ 169.0372</span></span>
 <span><span class="co">#&gt; 2 152.0342   [M+H-H2O]+ 169.0372</span></span>
@@ -323,60 +340,60 @@
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] IonFamilies_0.99.1  MsFeatures_1.20.0   xcms_4.10.1        </span></span>
-<span><span class="co">#&gt; [4] BiocParallel_1.46.0</span></span>
+<span><span class="co">#&gt; [1] dplyr_1.2.1         IonFamilies_0.99.2  MsFeatures_1.20.0  </span></span>
+<span><span class="co">#&gt; [4] xcms_4.10.1         BiocParallel_1.46.0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;  [1] tidyselect_1.2.1            dplyr_1.2.1                </span></span>
-<span><span class="co">#&gt;  [3] farver_2.1.2                S7_0.2.2                   </span></span>
-<span><span class="co">#&gt;  [5] fastmap_1.2.0               lazyeval_0.2.3             </span></span>
-<span><span class="co">#&gt;  [7] MassSpecWavelet_1.78.2      XML_3.99-0.25              </span></span>
-<span><span class="co">#&gt;  [9] digest_0.6.39               lifecycle_1.0.5            </span></span>
-<span><span class="co">#&gt; [11] cluster_2.1.8.3             ProtGenerics_1.44.0        </span></span>
-<span><span class="co">#&gt; [13] PTMods_1.0.0                statmod_1.5.2              </span></span>
-<span><span class="co">#&gt; [15] magrittr_2.0.5              compiler_4.6.2             </span></span>
-<span><span class="co">#&gt; [17] progress_1.2.3              rlang_1.3.0                </span></span>
-<span><span class="co">#&gt; [19] tools_4.6.2                 igraph_2.3.4               </span></span>
-<span><span class="co">#&gt; [21] yaml_2.3.12                 data.table_1.18.6.1        </span></span>
-<span><span class="co">#&gt; [23] knitr_1.52                  prettyunits_1.2.0          </span></span>
-<span><span class="co">#&gt; [25] S4Arrays_1.12.1             DelayedArray_0.38.2        </span></span>
-<span><span class="co">#&gt; [27] plyr_1.8.9                  RColorBrewer_1.1-3         </span></span>
-<span><span class="co">#&gt; [29] abind_1.4-8                 purrr_1.2.2                </span></span>
-<span><span class="co">#&gt; [31] BiocGenerics_0.58.1         grid_4.6.2                 </span></span>
-<span><span class="co">#&gt; [33] stats4_4.6.2                preprocessCore_1.74.0      </span></span>
-<span><span class="co">#&gt; [35] ggplot2_4.0.3               iterators_1.0.14           </span></span>
-<span><span class="co">#&gt; [37] scales_1.4.0                MASS_7.3-66                </span></span>
-<span><span class="co">#&gt; [39] MultiAssayExperiment_1.38.0 SummarizedExperiment_1.42.0</span></span>
-<span><span class="co">#&gt; [41] cli_3.6.6                   crayon_1.5.3               </span></span>
-<span><span class="co">#&gt; [43] mzR_2.46.0                  rmarkdown_2.32             </span></span>
-<span><span class="co">#&gt; [45] generics_0.1.4              otel_0.3.0                 </span></span>
-<span><span class="co">#&gt; [47] reshape2_1.4.5              ncdf4_1.24                 </span></span>
-<span><span class="co">#&gt; [49] DBI_1.3.0                   affy_1.90.0                </span></span>
-<span><span class="co">#&gt; [51] stringr_1.6.0               parallel_4.6.2             </span></span>
-<span><span class="co">#&gt; [53] impute_1.86.0               BiocManager_1.30.27        </span></span>
-<span><span class="co">#&gt; [55] AnnotationFilter_1.36.0     XVector_0.52.0             </span></span>
-<span><span class="co">#&gt; [57] vsn_3.80.0                  matrixStats_1.5.0          </span></span>
-<span><span class="co">#&gt; [59] vctrs_0.7.3                 Matrix_1.7-6               </span></span>
-<span><span class="co">#&gt; [61] jsonlite_2.0.0              hms_1.1.4                  </span></span>
-<span><span class="co">#&gt; [63] IRanges_2.46.0              S4Vectors_0.50.3           </span></span>
-<span><span class="co">#&gt; [65] MsExperiment_1.14.0         MALDIquant_1.22.3          </span></span>
-<span><span class="co">#&gt; [67] clue_0.3-68                 foreach_1.5.2              </span></span>
-<span><span class="co">#&gt; [69] limma_3.68.5                tidyr_1.3.2                </span></span>
-<span><span class="co">#&gt; [71] affyio_1.82.0               glue_1.8.1                 </span></span>
-<span><span class="co">#&gt; [73] MSnbase_2.38.1              codetools_0.2-20           </span></span>
-<span><span class="co">#&gt; [75] QFeatures_1.22.0            Spectra_1.22.2             </span></span>
-<span><span class="co">#&gt; [77] stringi_1.8.9               gtable_0.3.6               </span></span>
-<span><span class="co">#&gt; [79] GenomicRanges_1.64.0        mzID_1.50.0                </span></span>
-<span><span class="co">#&gt; [81] tibble_3.3.1                pillar_1.11.1              </span></span>
-<span><span class="co">#&gt; [83] pcaMethods_2.4.0            htmltools_0.5.9            </span></span>
-<span><span class="co">#&gt; [85] Seqinfo_1.2.0               R6_2.6.1                   </span></span>
-<span><span class="co">#&gt; [87] doParallel_1.0.17           evaluate_1.0.5             </span></span>
-<span><span class="co">#&gt; [89] lattice_0.23-1              Biobase_2.72.0             </span></span>
-<span><span class="co">#&gt; [91] MetaboCoreUtils_1.20.1      Rcpp_1.1.2                 </span></span>
-<span><span class="co">#&gt; [93] PSMatch_1.16.0              SparseArray_1.12.3         </span></span>
-<span><span class="co">#&gt; [95] xfun_0.62                   MsCoreUtils_1.24.0         </span></span>
-<span><span class="co">#&gt; [97] MatrixGenerics_1.24.0       fs_2.1.0                   </span></span>
-<span><span class="co">#&gt; [99] pkgconfig_2.0.3</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] DBI_1.3.0                   rlang_1.3.0                </span></span>
+<span><span class="co">#&gt;  [3] magrittr_2.0.5              clue_0.3-68                </span></span>
+<span><span class="co">#&gt;  [5] MassSpecWavelet_1.78.2      otel_0.3.0                 </span></span>
+<span><span class="co">#&gt;  [7] matrixStats_1.5.0           compiler_4.6.2             </span></span>
+<span><span class="co">#&gt;  [9] PTMods_1.0.0                vctrs_0.7.3                </span></span>
+<span><span class="co">#&gt; [11] reshape2_1.4.5              stringr_1.6.0              </span></span>
+<span><span class="co">#&gt; [13] ProtGenerics_1.44.0         pkgconfig_2.0.3            </span></span>
+<span><span class="co">#&gt; [15] MetaboCoreUtils_1.20.1      crayon_1.5.3               </span></span>
+<span><span class="co">#&gt; [17] fastmap_1.2.0               XVector_0.52.0             </span></span>
+<span><span class="co">#&gt; [19] rmarkdown_2.32              preprocessCore_1.74.0      </span></span>
+<span><span class="co">#&gt; [21] purrr_1.2.2                 xfun_0.62                  </span></span>
+<span><span class="co">#&gt; [23] MultiAssayExperiment_1.38.0 jsonlite_2.0.0             </span></span>
+<span><span class="co">#&gt; [25] progress_1.2.3              DelayedArray_0.38.2        </span></span>
+<span><span class="co">#&gt; [27] parallel_4.6.2              prettyunits_1.2.0          </span></span>
+<span><span class="co">#&gt; [29] cluster_2.1.8.3             R6_2.6.1                   </span></span>
+<span><span class="co">#&gt; [31] stringi_1.8.9               RColorBrewer_1.1-3         </span></span>
+<span><span class="co">#&gt; [33] limma_3.68.5                GenomicRanges_1.64.0       </span></span>
+<span><span class="co">#&gt; [35] Rcpp_1.1.2                  Seqinfo_1.2.0              </span></span>
+<span><span class="co">#&gt; [37] SummarizedExperiment_1.42.0 iterators_1.0.14           </span></span>
+<span><span class="co">#&gt; [39] knitr_1.52                  IRanges_2.46.0             </span></span>
+<span><span class="co">#&gt; [41] Matrix_1.7-6                igraph_2.3.4               </span></span>
+<span><span class="co">#&gt; [43] tidyselect_1.2.1            abind_1.4-8                </span></span>
+<span><span class="co">#&gt; [45] yaml_2.3.12                 doParallel_1.0.17          </span></span>
+<span><span class="co">#&gt; [47] codetools_0.2-20            affy_1.90.0                </span></span>
+<span><span class="co">#&gt; [49] lattice_0.23-1              tibble_3.3.1               </span></span>
+<span><span class="co">#&gt; [51] plyr_1.8.9                  Biobase_2.72.0             </span></span>
+<span><span class="co">#&gt; [53] withr_3.0.3                 S7_0.2.2                   </span></span>
+<span><span class="co">#&gt; [55] evaluate_1.0.5              Spectra_1.22.2             </span></span>
+<span><span class="co">#&gt; [57] pillar_1.11.1               affyio_1.82.0              </span></span>
+<span><span class="co">#&gt; [59] BiocManager_1.30.27         MatrixGenerics_1.24.0      </span></span>
+<span><span class="co">#&gt; [61] foreach_1.5.2               stats4_4.6.2               </span></span>
+<span><span class="co">#&gt; [63] MSnbase_2.38.1              MALDIquant_1.22.3          </span></span>
+<span><span class="co">#&gt; [65] ncdf4_1.24                  generics_0.1.4             </span></span>
+<span><span class="co">#&gt; [67] S4Vectors_0.50.3            hms_1.1.4                  </span></span>
+<span><span class="co">#&gt; [69] ggplot2_4.0.3               scales_1.4.0               </span></span>
+<span><span class="co">#&gt; [71] MsExperiment_1.14.0         glue_1.8.1                 </span></span>
+<span><span class="co">#&gt; [73] lazyeval_0.2.3              tools_4.6.2                </span></span>
+<span><span class="co">#&gt; [75] mzID_1.50.0                 data.table_1.18.6.1        </span></span>
+<span><span class="co">#&gt; [77] QFeatures_1.22.0            vsn_3.80.0                 </span></span>
+<span><span class="co">#&gt; [79] mzR_2.46.0                  fs_2.1.0                   </span></span>
+<span><span class="co">#&gt; [81] XML_3.99-0.25               grid_4.6.2                 </span></span>
+<span><span class="co">#&gt; [83] impute_1.86.0               tidyr_1.3.2                </span></span>
+<span><span class="co">#&gt; [85] MsCoreUtils_1.24.0          PSMatch_1.16.0             </span></span>
+<span><span class="co">#&gt; [87] cli_3.6.6                   S4Arrays_1.12.1            </span></span>
+<span><span class="co">#&gt; [89] AnnotationFilter_1.36.0     pcaMethods_2.4.0           </span></span>
+<span><span class="co">#&gt; [91] gtable_0.3.6                digest_0.6.39              </span></span>
+<span><span class="co">#&gt; [93] BiocGenerics_0.58.1         SparseArray_1.12.3         </span></span>
+<span><span class="co">#&gt; [95] farver_2.1.2                htmltools_0.5.9            </span></span>
+<span><span class="co">#&gt; [97] lifecycle_1.0.5             statmod_1.5.2              </span></span>
+<span><span class="co">#&gt; [99] MASS_7.3-66</span></span></code></pre></div>
 </div>
 </section><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {

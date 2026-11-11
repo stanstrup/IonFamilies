@@ -71,6 +71,7 @@ library(xcms)
 #> 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'
 library(MsFeatures)
 library(IonFamilies)
+library(dplyr)
 
 x <- loadXcmsData("xmse")
 x <- groupFeatures(x, SimilarRtimeParam(diffRt = 10))
@@ -96,8 +97,11 @@ intensity of a feature is its median over the samples given by `subset`
 ``` r
 
 x <- annotateIsotopes(x, IsotopologueParam(ppm = 10, tolerance = 0.005))
-fd <- featureDefinitions(x)
-head(fd[fd$isotopes != "", c("mzmed", "rtmed", "feature_group", "isotopes")])
+fd <- as.data.frame(featureDefinitions(x))
+fd %>%
+    filter(isotopes != "") %>%
+    select(mzmed, rtmed, feature_group, isotopes) %>%
+    head()
 #>       mzmed    rtmed feature_group   isotopes
 #> FT033 300.2 3404.692    FG.002.001    [1][M]+
 #> FT034 301.0 2789.217    FG.006.001    [4][M]+
@@ -165,9 +169,17 @@ hypotheses:
 
 ``` r
 
-group <- names(which.max(tapply(hints$hypothesis, hints$feature_group, max)))
-fd <- featureDefinitions(x)
-fd[fd$feature_group == group, c("mzmed", "rtmed", "isotopes")]
+group <- hints %>%
+    slice_max(hypothesis, n = 1, with_ties = FALSE) %>%
+    pull(feature_group)
+
+fd <- featureDefinitions(x) %>%
+    as.data.frame() %>%
+    mutate(feature = row_number())
+
+fd %>%
+    filter(feature_group == group) %>%
+    select(mzmed, rtmed, isotopes)
 #>       mzmed    rtmed   isotopes
 #> FT040 305.1 3504.720           
 #> FT093 351.1 3503.953   [15][M]+
@@ -180,17 +192,20 @@ are:
 
 ``` r
 
-group_hints <- hints[hints$feature_group == group, ]
-group_hints$mzmed <- fd$mzmed[group_hints$feature]
-group_hints[order(group_hints$hypothesis, group_hints$mzmed),
-            c("hypothesis", "M", "n_ions", "score", "mzmed", "adduct", "rank")]
-#>    hypothesis        M n_ions score mzmed           adduct rank
-#> 9           1 350.0927      2  1.75 305.1     [M+H-HCOOH]+    1
-#> 24          1 350.0927      2  1.75 351.1           [M+H]+    1
-#> 10          2 282.1108      2  1.50 305.1          [M+Na]+    2
-#> 25          2 282.1108      2  1.50 351.1    [M+H+CHOONa]+    2
-#> 11          3 368.1033      2  1.25 305.1 [M+H-H2O-HCOOH]+    3
-#> 26          3 368.1033      2  1.25 351.1       [M+H-H2O]+    3
+group_hints <- hints %>%
+    filter(feature_group == group) %>%
+    left_join(select(fd, feature, mzmed), by = "feature") %>%
+    arrange(hypothesis, mzmed)
+
+group_hints %>%
+    select(hypothesis, M, n_ions, score, mzmed, adduct, rank)
+#>   hypothesis        M n_ions score mzmed           adduct rank
+#> 1          1 350.0927      2  1.75 305.1     [M+H-HCOOH]+    1
+#> 2          1 350.0927      2  1.75 351.1           [M+H]+    1
+#> 3          2 282.1108      2  1.50 305.1          [M+Na]+    2
+#> 4          2 282.1108      2  1.50 351.1    [M+H+CHOONa]+    2
+#> 5          3 368.1033      2  1.25 305.1 [M+H-H2O-HCOOH]+    3
+#> 6          3 368.1033      2  1.25 351.1       [M+H-H2O]+    3
 ```
 
 Each hypothesis explains the same features in a different way. The best
@@ -214,18 +229,19 @@ rewrites the column with another `nBest` without recomputing anything:
 ``` r
 
 x1 <- formatAdducts(x, nBest = 1)
-in_group <- fd$feature_group == group
-data.frame(mzmed = fd$mzmed[in_group],
-           nBest_3 = fd$adduct[in_group],
-           nBest_1 = featureDefinitions(x1)$adduct[in_group])
-#>   mzmed                                                       nBest_3
-#> 1 305.1 [M+H-HCOOH]+ 350.093 [M+Na]+ 282.111 [M+H-H2O-HCOOH]+ 368.103
-#> 2 351.1       [M+H]+ 350.093 [M+H+CHOONa]+ 282.111 [M+H-H2O]+ 368.103
-#> 3 353.1                                                              
-#>                nBest_1
-#> 1 [M+H-HCOOH]+ 350.093
-#> 2       [M+H]+ 350.093
-#> 3
+
+fd %>%
+    mutate(nBest_1 = featureDefinitions(x1)$adduct) %>%
+    filter(feature_group == group) %>%
+    select(mzmed, nBest_3 = adduct, nBest_1)
+#>       mzmed                                                       nBest_3
+#> FT040 305.1 [M+H-HCOOH]+ 350.093 [M+Na]+ 282.111 [M+H-H2O-HCOOH]+ 368.103
+#> FT093 351.1       [M+H]+ 350.093 [M+H+CHOONa]+ 282.111 [M+H-H2O]+ 368.103
+#> FT095 353.1                                                              
+#>                    nBest_1
+#> FT040 [M+H-HCOOH]+ 350.093
+#> FT093       [M+H]+ 350.093
+#> FT095
 ```
 
 ### One hypothesis per feature
@@ -237,14 +253,14 @@ skipped if any of its features is already explained:
 
 ``` r
 
-best <- bestHypotheses(hints)
-best[best$feature_group == group, ]
-#>    feature feature_group hypothesis rank        M       adduct n_ions score
-#> 17      40    FG.030.001          1    1 350.0927 [M+H-HCOOH]+      2  1.75
-#> 18      93    FG.030.001          1    1 350.0927       [M+H]+      2  1.75
-#>    intensity
-#> 17  822876.7
-#> 18  822876.7
+bestHypotheses(hints) %>%
+    filter(feature_group == group)
+#>   feature feature_group hypothesis rank        M       adduct n_ions score
+#> 1      40    FG.030.001          1    1 350.0927 [M+H-HCOOH]+      2  1.75
+#> 2      93    FG.030.001          1    1 350.0927       [M+H]+      2  1.75
+#>   intensity
+#> 1  822876.7
+#> 2  822876.7
 ```
 
 ### Stored parameters
@@ -320,9 +336,10 @@ protonated molecule and is therefore left out:
 
 ``` r
 
-best <- hints[hints$hypothesis == 1, ]
-data.frame(mz = mz[best$feature], adduct = best$adduct,
-           M = round(best$M, 4))
+hints %>%
+    filter(hypothesis == 1) %>%
+    mutate(mz = mz[feature], M = round(M, 4)) %>%
+    select(mz, adduct, M)
 #>         mz       adduct        M
 #> 1 124.0392 [M+H-HCOOH]+ 169.0372
 #> 2 152.0342   [M+H-H2O]+ 169.0372
@@ -357,58 +374,58 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] IonFamilies_0.99.1  MsFeatures_1.20.0   xcms_4.10.1        
-#> [4] BiocParallel_1.46.0
+#> [1] dplyr_1.2.1         IonFamilies_0.99.2  MsFeatures_1.20.0  
+#> [4] xcms_4.10.1         BiocParallel_1.46.0
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] tidyselect_1.2.1            dplyr_1.2.1                
-#>  [3] farver_2.1.2                S7_0.2.2                   
-#>  [5] fastmap_1.2.0               lazyeval_0.2.3             
-#>  [7] MassSpecWavelet_1.78.2      XML_3.99-0.25              
-#>  [9] digest_0.6.39               lifecycle_1.0.5            
-#> [11] cluster_2.1.8.3             ProtGenerics_1.44.0        
-#> [13] PTMods_1.0.0                statmod_1.5.2              
-#> [15] magrittr_2.0.5              compiler_4.6.2             
-#> [17] progress_1.2.3              rlang_1.3.0                
-#> [19] tools_4.6.2                 igraph_2.3.4               
-#> [21] yaml_2.3.12                 data.table_1.18.6.1        
-#> [23] knitr_1.52                  prettyunits_1.2.0          
-#> [25] S4Arrays_1.12.1             DelayedArray_0.38.2        
-#> [27] plyr_1.8.9                  RColorBrewer_1.1-3         
-#> [29] abind_1.4-8                 purrr_1.2.2                
-#> [31] BiocGenerics_0.58.1         grid_4.6.2                 
-#> [33] stats4_4.6.2                preprocessCore_1.74.0      
-#> [35] ggplot2_4.0.3               iterators_1.0.14           
-#> [37] scales_1.4.0                MASS_7.3-66                
-#> [39] MultiAssayExperiment_1.38.0 SummarizedExperiment_1.42.0
-#> [41] cli_3.6.6                   crayon_1.5.3               
-#> [43] mzR_2.46.0                  rmarkdown_2.32             
-#> [45] generics_0.1.4              otel_0.3.0                 
-#> [47] reshape2_1.4.5              ncdf4_1.24                 
-#> [49] DBI_1.3.0                   affy_1.90.0                
-#> [51] stringr_1.6.0               parallel_4.6.2             
-#> [53] impute_1.86.0               BiocManager_1.30.27        
-#> [55] AnnotationFilter_1.36.0     XVector_0.52.0             
-#> [57] vsn_3.80.0                  matrixStats_1.5.0          
-#> [59] vctrs_0.7.3                 Matrix_1.7-6               
-#> [61] jsonlite_2.0.0              hms_1.1.4                  
-#> [63] IRanges_2.46.0              S4Vectors_0.50.3           
-#> [65] MsExperiment_1.14.0         MALDIquant_1.22.3          
-#> [67] clue_0.3-68                 foreach_1.5.2              
-#> [69] limma_3.68.5                tidyr_1.3.2                
-#> [71] affyio_1.82.0               glue_1.8.1                 
-#> [73] MSnbase_2.38.1              codetools_0.2-20           
-#> [75] QFeatures_1.22.0            Spectra_1.22.2             
-#> [77] stringi_1.8.9               gtable_0.3.6               
-#> [79] GenomicRanges_1.64.0        mzID_1.50.0                
-#> [81] tibble_3.3.1                pillar_1.11.1              
-#> [83] pcaMethods_2.4.0            htmltools_0.5.9            
-#> [85] Seqinfo_1.2.0               R6_2.6.1                   
-#> [87] doParallel_1.0.17           evaluate_1.0.5             
-#> [89] lattice_0.23-1              Biobase_2.72.0             
-#> [91] MetaboCoreUtils_1.20.1      Rcpp_1.1.2                 
-#> [93] PSMatch_1.16.0              SparseArray_1.12.3         
-#> [95] xfun_0.62                   MsCoreUtils_1.24.0         
-#> [97] MatrixGenerics_1.24.0       fs_2.1.0                   
-#> [99] pkgconfig_2.0.3
+#>  [1] DBI_1.3.0                   rlang_1.3.0                
+#>  [3] magrittr_2.0.5              clue_0.3-68                
+#>  [5] MassSpecWavelet_1.78.2      otel_0.3.0                 
+#>  [7] matrixStats_1.5.0           compiler_4.6.2             
+#>  [9] PTMods_1.0.0                vctrs_0.7.3                
+#> [11] reshape2_1.4.5              stringr_1.6.0              
+#> [13] ProtGenerics_1.44.0         pkgconfig_2.0.3            
+#> [15] MetaboCoreUtils_1.20.1      crayon_1.5.3               
+#> [17] fastmap_1.2.0               XVector_0.52.0             
+#> [19] rmarkdown_2.32              preprocessCore_1.74.0      
+#> [21] purrr_1.2.2                 xfun_0.62                  
+#> [23] MultiAssayExperiment_1.38.0 jsonlite_2.0.0             
+#> [25] progress_1.2.3              DelayedArray_0.38.2        
+#> [27] parallel_4.6.2              prettyunits_1.2.0          
+#> [29] cluster_2.1.8.3             R6_2.6.1                   
+#> [31] stringi_1.8.9               RColorBrewer_1.1-3         
+#> [33] limma_3.68.5                GenomicRanges_1.64.0       
+#> [35] Rcpp_1.1.2                  Seqinfo_1.2.0              
+#> [37] SummarizedExperiment_1.42.0 iterators_1.0.14           
+#> [39] knitr_1.52                  IRanges_2.46.0             
+#> [41] Matrix_1.7-6                igraph_2.3.4               
+#> [43] tidyselect_1.2.1            abind_1.4-8                
+#> [45] yaml_2.3.12                 doParallel_1.0.17          
+#> [47] codetools_0.2-20            affy_1.90.0                
+#> [49] lattice_0.23-1              tibble_3.3.1               
+#> [51] plyr_1.8.9                  Biobase_2.72.0             
+#> [53] withr_3.0.3                 S7_0.2.2                   
+#> [55] evaluate_1.0.5              Spectra_1.22.2             
+#> [57] pillar_1.11.1               affyio_1.82.0              
+#> [59] BiocManager_1.30.27         MatrixGenerics_1.24.0      
+#> [61] foreach_1.5.2               stats4_4.6.2               
+#> [63] MSnbase_2.38.1              MALDIquant_1.22.3          
+#> [65] ncdf4_1.24                  generics_0.1.4             
+#> [67] S4Vectors_0.50.3            hms_1.1.4                  
+#> [69] ggplot2_4.0.3               scales_1.4.0               
+#> [71] MsExperiment_1.14.0         glue_1.8.1                 
+#> [73] lazyeval_0.2.3              tools_4.6.2                
+#> [75] mzID_1.50.0                 data.table_1.18.6.1        
+#> [77] QFeatures_1.22.0            vsn_3.80.0                 
+#> [79] mzR_2.46.0                  fs_2.1.0                   
+#> [81] XML_3.99-0.25               grid_4.6.2                 
+#> [83] impute_1.86.0               tidyr_1.3.2                
+#> [85] MsCoreUtils_1.24.0          PSMatch_1.16.0             
+#> [87] cli_3.6.6                   S4Arrays_1.12.1            
+#> [89] AnnotationFilter_1.36.0     pcaMethods_2.4.0           
+#> [91] gtable_0.3.6                digest_0.6.39              
+#> [93] BiocGenerics_0.58.1         SparseArray_1.12.3         
+#> [95] farver_2.1.2                htmltools_0.5.9            
+#> [97] lifecycle_1.0.5             statmod_1.5.2              
+#> [99] MASS_7.3-66
 ```

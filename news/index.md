@@ -1,5 +1,12 @@
 # Changelog
 
+## Changes in v0.99.2 (commit: 9b097f6)
+
+### Features
+
+- use feature_group instead of pcgroup and the hint column group
+  ([9b097f6](https://github.com/stanstrup/IonFamilies/commit/9b097f6e56e2e7e91f331d457773bc7b97cdd1d4))
+
 ## Changes in v0.99.1 (commit: 2faf209)
 
 ### Features

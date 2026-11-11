@@ -233,7 +233,7 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] IonFamilies_0.99.1
+#> [1] IonFamilies_0.99.2
 #> 
 #> loaded via a namespace (and not attached):
 #>   [1] tidyselect_1.2.1            dplyr_1.2.1                
