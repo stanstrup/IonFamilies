@@ -97,8 +97,8 @@ neutralMassVote <- function(mz, intensity, rules, ppm = 10, mzabs = 0.005) {
 bestHypotheses <- function(x) {
     if (!nrow(x))
         return(x)
-    x <- x[order(x$group, x$hypothesis), , drop = FALSE]
-    key <- paste(x$group, x$hypothesis, sep = "\r")
+    x <- x[order(x$feature_group, x$hypothesis), , drop = FALSE]
+    key <- paste(x$feature_group, x$hypothesis, sep = "\r")
     keys <- unique(key)
     keep <- logical(length(keys))
     used <- integer()
@@ -125,12 +125,12 @@ bestHypotheses <- function(x) {
 
 .empty_hints <- function() {
     res <- .empty_votes()
-    res$group <- character()
+    res$feature_group <- character()
     res$rank <- integer()
     res[, .HINT_COLUMNS]
 }
 
-.HINT_COLUMNS <- c("feature", "group", "hypothesis", "rank", "M", "adduct",
+.HINT_COLUMNS <- c("feature", "feature_group", "hypothesis", "rank", "M", "adduct",
                    "n_ions", "score", "intensity")
 
 ## Long table of every (feature, rule) combination with a positive mass
@@ -186,7 +186,7 @@ bestHypotheses <- function(x) {
 }
 
 .add_group <- function(x, group) {
-    x$group <- rep(group, nrow(x))
+    x$feature_group <- rep(group, nrow(x))
     x
 }
 

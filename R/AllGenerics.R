@@ -54,14 +54,14 @@ setGeneric("annotateIsotopes", function(object, param, ...)
 #' @param ... ignored.
 #'
 #' @return For the `numeric` method a `data.frame` with one row per
-#'     hypothesis and feature and the columns `feature` (index), `group`,
+#'     hypothesis and feature and the columns `feature` (index),
+#'     `feature_group`,
 #'     `hypothesis` (rank within the group), `rank` (rank for this feature,
 #'     1 = most plausible), `M` (neutral mass), `adduct` (rule name),
 #'     `n_ions` (number of features supporting `M`), `score` and
 #'     `intensity`. For the `XcmsExperiment` method the object, with the
-#'     columns `adduct` (the best `nBest` hints as text), `adduct_hints` (a
-#'     list column with all hypotheses per feature) and `pcgroup` (integer
-#'     group number, 1 = group with the most intense feature) added to
+#'     columns `adduct` (the best `nBest` hints as text) and `adduct_hints`
+#'     (a list column with all hypotheses per feature) added to
 #'     `featureDefinitions()`, and the parameters in
 #'     `metadata(object)$IonFamilies$adducts`.
 #'

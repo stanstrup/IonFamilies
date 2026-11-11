@@ -10,23 +10,24 @@ test_that("annotation is stored in featureDefinitions and metadata", {
     x <- annotateIsotopes(x, IsotopologueParam())
     x <- annotateAdducts(x, AdductVoteParam(nBest = 2))
     fd <- xcms::featureDefinitions(x)
-    expect_true(all(c("isotopes", "adduct", "adduct_hints", "pcgroup") %in%
+    expect_true(all(c("isotopes", "adduct", "adduct_hints") %in%
                         colnames(fd)))
+    expect_false("pcgroup" %in% colnames(fd))
     expect_type(fd$isotopes, "character")
     expect_type(fd$adduct, "character")
-    expect_type(fd$pcgroup, "integer")
     expect_length(fd$adduct_hints, nrow(fd))
     params <- S4Vectors::metadata(x)$IonFamilies
     expect_s4_class(params$isotopes, "IsotopologueParam")
     expect_s4_class(params$adducts, "AdductVoteParam")
 })
 
-test_that("pcgroup numbers follow the feature groups", {
+test_that("the feature group is not stored in the hints", {
     x <- annotateAdducts(grouped_xmse(), AdductVoteParam())
     fd <- xcms::featureDefinitions(x)
-    expect_identical(length(unique(fd$pcgroup)),
-                     length(unique(fd$feature_group)))
-    expect_true(all(tapply(fd$pcgroup, fd$feature_group, n_unique) == 1L))
+    stored <- unique(unlist(lapply(fd$adduct_hints, colnames)))
+    expect_false(any(c("feature", "feature_group") %in% stored))
+    h <- adductHints(x)
+    expect_identical(h$feature_group, fd$feature_group[h$feature])
 })
 
 test_that("adductHints round-trips the stored hypotheses", {
@@ -57,8 +58,9 @@ test_that("annotation survives filterFeatureDefinitions", {
     y <- xcms::filterFeatureDefinitions(x, 1:20)
     fd <- xcms::featureDefinitions(y)
     expect_identical(nrow(fd), 20L)
-    expect_true(all(c("adduct", "adduct_hints", "pcgroup") %in%
-                        colnames(fd)))
+    expect_true(all(c("adduct", "adduct_hints") %in% colnames(fd)))
+    h <- adductHints(y)
+    expect_identical(h$feature_group, fd$feature_group[h$feature])
     expect_s4_class(S4Vectors::metadata(y)$IonFamilies$adducts,
                     "AdductVoteParam")
 })

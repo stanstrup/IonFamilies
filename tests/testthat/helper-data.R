@@ -19,7 +19,3 @@ grouped_xmse <- function() {
         x, MsFeatures::AbundanceSimilarityParam(threshold = 0.7,
                                                 transform = log2))
 }
-
-n_unique <- function(x) {
-    length(unique(x))
-}

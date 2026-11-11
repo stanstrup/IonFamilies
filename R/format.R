@@ -17,9 +17,11 @@
     out
 }
 
-## One data.frame of hints per feature, for the list column
+## One data.frame of hints per feature, for the list column. The feature
+## index and its feature group follow from the row of featureDefinitions()
+## and are not stored.
 .hints_to_list <- function(hints, nFeatures) {
-    cols <- setdiff(.HINT_COLUMNS, "feature")
+    cols <- setdiff(.HINT_COLUMNS, c("feature", "feature_group"))
     per_feature <- split(hints[, cols, drop = FALSE],
                          factor(hints$feature, levels = seq_len(nFeatures)))
     lapply(unname(per_feature), .drop_rownames)
@@ -35,21 +37,17 @@
     x
 }
 
-## Back from the list column to one long data.frame
-.list_to_hints <- function(x) {
+## Back from the list column to one long data.frame; `groups` are the
+## feature groups of all features (featureGroups())
+.list_to_hints <- function(x, groups) {
     if (!length(x))
         return(.empty_hints())
     res <- do.call(rbind, mapply(.add_feature_index, x, seq_along(x),
                                  SIMPLIFY = FALSE))
     if (is.null(res) || !nrow(res))
         return(.empty_hints())
+    res$feature_group <- groups[res$feature]
     res <- res[, .HINT_COLUMNS, drop = FALSE]
     rownames(res) <- NULL
     res
-}
-
-## Integer group numbers; 1 = group containing the most intense feature
-.pcgroup_numbers <- function(groups, intensity) {
-    levels <- unique(groups[order(-intensity)])
-    as.integer(factor(groups, levels = levels))
 }

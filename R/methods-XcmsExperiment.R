@@ -37,7 +37,6 @@ setMethod("annotateAdducts", signature("XcmsExperiment", "AdductVoteParam"),
                                          rules = param@rules,
                                          exclude = exclude, ppm = param@ppm,
                                          mzabs = param@mzabs)
-              fd$pcgroup <- .pcgroup_numbers(groups, intensity)
               fd$adduct <- .format_hints(hints, nrow(fd), param@nBest)
               fd$adduct_hints <- I(.hints_to_list(hints, nrow(fd)))
               featureDefinitions(object) <- fd
@@ -49,7 +48,7 @@ setMethod("adductHints", "XcmsExperiment", function(object, ...) {
     fd <- featureDefinitions(object)
     if (!"adduct_hints" %in% colnames(fd))
         stop("No adduct annotation found. Run 'annotateAdducts()' first.")
-    .list_to_hints(fd$adduct_hints)
+    .list_to_hints(fd$adduct_hints, featureGroups(object))
 })
 
 #' @rdname formatAdducts

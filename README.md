@@ -19,8 +19,9 @@ same compound. **IonFamilies** annotates the ion family within each group:
   All supported hypotheses are kept and ranked, because the annotations are
   hints and a missed true annotation is worse than a coincidental one.
 
-Results go into `featureDefinitions()` of the `XcmsExperiment` in CAMERA's
-column format (`pcgroup`, `isotopes`, `adduct`). All hypotheses are kept in
+Results go into `featureDefinitions()` of the `XcmsExperiment`: `isotopes`
+and `adduct` hold the labels as text in CAMERA's syntax, and the grouping is
+the `feature_group` column from `groupFeatures()`. All hypotheses are kept in
 the list column `adduct_hints` (`adductHints()`), and the parameters in
 `metadata(x)$IonFamilies`.
 
@@ -33,7 +34,7 @@ x <- groupFeatures(x, SimilarRtimeParam(diffRt = 3))
 x <- groupFeatures(x, AbundanceSimilarityParam(threshold = 0.7, transform = log2))
 x <- annotateIsotopes(x, IsotopologueParam(ppm = 10))
 x <- annotateAdducts(x, AdductVoteParam(polarity = "positive", nBest = 3))
-featureDefinitions(x)[, c("feature_group", "pcgroup", "isotopes", "adduct")]
+featureDefinitions(x)[, c("feature_group", "isotopes", "adduct")]
 adductHints(x)
 ```
 

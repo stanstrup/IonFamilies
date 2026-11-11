@@ -40,14 +40,14 @@ out, normally heavy isotopologues (\code{isIsotopologue(labels)}). The
 }
 \value{
 For the \code{numeric} method a \code{data.frame} with one row per
-hypothesis and feature and the columns \code{feature} (index), \code{group},
+hypothesis and feature and the columns \code{feature} (index),
+\code{feature_group},
 \code{hypothesis} (rank within the group), \code{rank} (rank for this feature,
 1 = most plausible), \code{M} (neutral mass), \code{adduct} (rule name),
 \code{n_ions} (number of features supporting \code{M}), \code{score} and
 \code{intensity}. For the \code{XcmsExperiment} method the object, with the
-columns \code{adduct} (the best \code{nBest} hints as text), \code{adduct_hints} (a
-list column with all hypotheses per feature) and \code{pcgroup} (integer
-group number, 1 = group with the most intense feature) added to
+columns \code{adduct} (the best \code{nBest} hints as text) and \code{adduct_hints}
+(a list column with all hypotheses per feature) added to
 \code{featureDefinitions()}, and the parameters in
 \code{metadata(object)$IonFamilies$adducts}.
 }
